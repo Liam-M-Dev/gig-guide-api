@@ -33,6 +33,13 @@ Bands and Venues have similar relationships with shows where they are able to cr
 
 ### R7) Detail any third party services that your app will use
 
+- Flask
+- flask-sqlalchemy + SQLAlchemy
+- flask-marshmallow + Marshmallow
+- flask-bcrypt
+- flask-jwt-extender
+- Insomnia/postman
+
 ***
 
 ### R8) Describe your projects models in terms of the relationships they have with each other
@@ -82,6 +89,25 @@ The relations that are implemented are as follows:
 
 ### R10) Describe the way tasks are allocated and tracked in your project
 
+For this project I decided to use Trello boards with a kanban style set up of the cards. In each card there is often checklists to check off as I am going through this project, I have set realistic dates to achieve these by that allows for time to make sure everything is running smoothly towards the end of the project.
+
+The initial phase of the setup is done through a few various cards which are, the create virtual environment card, set up postgresql card - setting dates for these as the 2nd of March. My next step is to create the main application file, main.py, creating a config file and connecting that to the main app function. Also have the set up for the .env and .flask-env files. These cards have set dates for the 4th of March to be completed.  
+
+I have created a card for creating the models of my project, each model has checklists to be completed within in them. The checklists include setting up the fields of the model, defining the primary key and defining the relationships that are represented between the models. For the models card I have set the date for completion on the 5th of March.  
+
+Schemas are also defined in the schema card with checklists for each schema to ensure that it is completed and covers what is needed. Inside each checklist I have to implement the fields for each schema, implement the nesting of relationships that is appropriate through marshmallow and its functions such as fields, list etc. This is also set to be completed on the 5th of March.  
+
+Creating CLI commands is my next task to ensure that the connection between the database and the flask app is working as intended. To do this I have set out a checklist to ensure that I create a function to create the database, drop the database and seed the database with information of 5 users, 5 bands, 5 venues, 10 shows and 4 attending. The intention is to have this done by the 6th of March.  
+
+Once CLI commands are finalized within the app, I am going to create my initial setup of controllers. This is tracked via the controllers card, which has a checklist for each individual controller and for the init.py file. Within the init.py file I have a checklist to ensure each controller is added to the registerable controllers, and then implemented into the main app function. Each individual controller has a check list that ensures the blueprints are created and an initial get route to display the information for each table. This will be tracked with the use of Insomnia to ensure that the results are produced correctly. The due date for this is the 7th of March.
+
+The next task is to initialize the routing and implement all the functions and features that I am intending to have related to the databases.  
+To begin the process I have a card representing the routing for Users, With a checklist that ticks off the CRUD features, creating a user, reading users, updating users and deleting users, ensuring there is also appropriate authentication and validation and implementing searching functions to allow show the user what venues or bands are connected to their ID. Implementation plan of this is to have it done by the 8th.  
+Routing for bands is the next one on the list and follows a similar line of checking the CRUD features, also creating search features to show bands with their upcoming shows, similar genres and states and displaying bands that have connected user IDs.  
+Routing for venues is the next card to check off that follows the same principals as before with CRUD features and displaying shows that are upcoming associated with the venue as well as displaying user ids that connect to the venues.  
+Routing for Shows again follows similar CRUD principals allowing a venue or band to create, update, read and delete upcoming shows. It also has features to display shows that are connected to one venue or shows that are connected to one band.  
+The Attending routing is done through users which gives users the ability to add themselves as attending to a show, delete their attendance to a show and update their attendance to a different show. It also allows displaying of users going to a single show and shows that one user is selected to attend. These routes are all intended to be finalized by the 12th of March.  
+Finally the last cards are for the documentation that is intended to finish up by the 17th of March. To have all the coding finished by the 12th is my ideal mission as this allows for testing to ensure everything is being handled appropriately, error handing is completely covered and if any features need editing or adding.  
 ***
 
 ### Software Development Plan
