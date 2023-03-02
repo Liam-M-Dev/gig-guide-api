@@ -14,7 +14,7 @@ My project is built to create a central location for bands and venues to post up
 
 ***
 
-### R4) Identify and discuss the key functionalities and benifits of an ORM  
+### R4) Identify and discuss the key functionalities and benefits of an ORM  
 
 ***
 
@@ -63,9 +63,20 @@ A show model is where bands or venues are able to create a show that is upcoming
 
 #### **Attending**
 
+Attending model is to represent the relationship between a user and shows. It is made up of a primary key for the attending_id, and 2 foreign keys the user_id and the show_id, which are both not nullable.  
+
 ***
 
 ### R9) Discuss the database relations to be implemented in your application
+
+The relations that are implemented are as follows:  
+
+- Users has a one to many relationship with bands, this is because one user is able to have many bands under their ID. This is shown through the ERD with the band model having a foreign key that points to a user_id. This is a reality in the real world because being a musician allows you to play for multiple bands with different genres or the same genre.
+- Users have a one to many relationship with venues, as one user can own multiple venues. This is shown through the ERD by implementing a user_id as a foreign key inside the venue model that helps point a venue back to a user within the users table. In the real world often multiple venues can be owned by the same person and I was wanting to reflect that within my API.
+- Users also have a many to many relationship with shows, that is associated within the Attending table via foreign key within the model. You can see this represented in the ERD with the one to many line connecting users to the attending table. This reflects reality as a person is able to book themselves into multiple shows.  
+- Bands have a one to many relationship with the shows. this is represented through the ERD with the one to many connection and a band_id associated within the show model. This allows bands to create multiple shows however a band cannot create the same show at the same venue on the same date. This is reflected in the real world as bands tend to play multiple shows on a night or over a period of time, or they may play the same show at different venues.
+- Venues have a one to many relationship with shows that is associated within the show table as a one to many line on the ERD. This points a show to a venue_id via a foreign key. In reality venues often have multiple shows on during the week and on the same night, to help differentiate the shows this allows a connection to which venue is hosting what gig and which bands will be playing that gig.
+- Shows has a many to many relationship with users that is associated within the attending table as well. You can see this represented within the ERD. The attending table allows many shows to be associated to many users through the foreign keys within the attending model.
 
 ***
 
