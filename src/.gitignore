@@ -1,2 +1,7 @@
+__pycache__/
 # virutal environments
 .venv/
+
+# development environments
+.env
+.flaskenv
