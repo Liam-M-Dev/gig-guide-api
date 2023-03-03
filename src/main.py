@@ -1,5 +1,10 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 def create_app():
 
@@ -7,6 +12,10 @@ def create_app():
 
     app.config.from_object("config.app_config")
 
-    db = SQLAlchemy(app)
+    db.init_app(app)
+
+    bcrypt.init_app(app)
+
+    
 
     return app
