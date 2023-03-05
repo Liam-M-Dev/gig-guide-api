@@ -10,3 +10,14 @@ class User(db.Model):
     email = db.Column(db.String(),nullable=False)
     password = db.Column(db.String(),nullable=False)
     admin = db.Column(db.Boolean(), default=False)
+
+    bands = db.relationship(
+        "Band",
+        backref="user",
+        cascade="all, delete"
+    )
+    venues = db.relationship(
+        "Venue",
+        backref="user",
+        cascade="all, delete"
+    )
