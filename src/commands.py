@@ -1,6 +1,10 @@
 from main import db
 from flask import Blueprint
 from models.user import User
+from models.band import Band
+from models.venue import Venue
+from models.show import Show
+from models.attending import Attending
 
 db_commands = Blueprint("db", __name__)
 

@@ -11,3 +11,9 @@ class Show(db.Model):
                         nullable=False)
     venue_id = db.Column(db.Integer,db.ForeignKey("VENUES.id"),
                         nullable=False)
+    
+    attending = db.relationship(
+        "Attending",
+        backref="show",
+        cascade="all, delete"
+    )

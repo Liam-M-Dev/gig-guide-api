@@ -21,3 +21,8 @@ class User(db.Model):
         backref="user",
         cascade="all, delete"
     )
+    attending = db.relationship(
+        "Attending",
+        backref="user",
+        cascade="all, delete"
+    )
