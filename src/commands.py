@@ -5,6 +5,7 @@ from models.band import Band
 from models.venue import Venue
 from models.show import Show
 from models.attending import Attending
+from models.playing import Playing
 
 db_commands = Blueprint("db", __name__)
 
@@ -144,6 +145,34 @@ def seed_db():
     db.session.add(venue5)
 
     db.session.commit()
+
+    show1 = Show(
+        show_name = "Midnight Madness",
+        date = "19/12/2023",
+        band_id = 2,
+        venue_id = 1,
+    )
+    db.session.add(show1)
+
+    show2 = Show(
+        show_name = "A Night of Speed",
+        date = "13/05/2023",
+        band_id = 4,
+        venue_id = 4,
+    )
+    db.session.add(show2)
+
+    show3 = Show(
+        show_name = "Perth Noise",
+        date = "05/10/2023",
+        band_id = 5,
+        venue_id = 5,
+    )
+    db.session.add(show3)
+
+    db.session.commit()
+
+    
 
     print("table seeded")
 

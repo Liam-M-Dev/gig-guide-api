@@ -5,5 +5,8 @@ class Playing(db.Model):
     __tablename__ = "PLAYING"
 
     id = db.Column(db.Integer,primary_key=True)
-    band = db.Column(db.Integer,nullable=False)
-    show = db.Column(db.Integer,nullable=False)
+    band_id = db.Column(db.Integer,db.ForeignKey("BANDS.id"),
+                     nullable=False)
+    show_id = db.Column(db.Integer,db.ForeignKey("SHOWS.id"),
+                     nullable=False)
+
