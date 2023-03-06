@@ -172,6 +172,45 @@ def seed_db():
 
     db.session.commit()
 
+    attending1 = Attending(
+        user_id = 4,
+        show_id = 1,
+    )
+    db.session.add(attending1)
+
+    attending2 = Attending(
+        user_id = 1,
+        show_id = 2,
+    )
+    db.session.add(attending2)
+
+    db.session.commit()
+
+    playing1 = Playing(
+        band_id = 2,
+        show_id = 1,
+    )
+    db.session.add(playing1)
+
+    playing2 = Playing(
+        band_id = 3,
+        show_id = 1,
+    )
+    db.session.add(playing2)
+
+    playing3 = Playing(
+        band_id = 5,
+        show_id = 2,
+    )
+    db.session.add(playing2)
+
+    playing4 = Playing(
+        band_id = 2,
+        show_id = 3,
+    )
+    db.session.add(playing4)
+
+    db.session.commit()
     
 
     print("table seeded")
