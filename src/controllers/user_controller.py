@@ -23,11 +23,11 @@ def get_users():
 
 
 # Get method for displaying contents of attending table
-@users.route("/attending/show")
-def get_attendees():
+# @users.route("/attending/show")
+# def get_attendees():
 
-    attendees_list = Attending.query.all()
+#     attendees_list = Attending.query.all()
 
-    result = attending_schemas.dump(attendees_list)
+#     result = attending_schemas.dump(attendees_list)
 
-    return jsonify(result)
+#     return jsonify(result)
