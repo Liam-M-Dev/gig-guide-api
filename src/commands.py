@@ -202,7 +202,7 @@ def seed_db():
         band_id = 5,
         show_id = 2,
     )
-    db.session.add(playing2)
+    db.session.add(playing3)
 
     playing4 = Playing(
         band_id = 2,
@@ -212,7 +212,6 @@ def seed_db():
 
     db.session.commit()
     
-
     print("table seeded")
 
 
