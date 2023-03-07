@@ -4,9 +4,9 @@ from marshmallow import fields
 
 class AttendingSchema(ma.Schema):
     class Meta:
-        fields = ("user", "shows")
-
-    users = fields.Nested("UserSchema", only="id")
-    shows = fields.Nested("ShowSchema", only="id")
+        fields = ("id", "user_id", "show_id")
 
 
+
+attending_schema = AttendingSchema()
+attending_schemas = AttendingSchema(many=True)
