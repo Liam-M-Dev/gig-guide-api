@@ -6,7 +6,7 @@ class VenueSchema(ma.Schema):
         # fields to be exposed
         fields = ("id", "venue_name", "location", "user")
 
-    user = fields.Nested("UserSchema", only=("id", "first_name", "last_name"))
+    user = fields.Nested("UserSchema", only=["id", "first_name", "last_name"])
 
 
 venue_schema = VenueSchema()

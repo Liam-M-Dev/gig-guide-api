@@ -16,6 +16,6 @@ def get_bands():
 
     bands_list = Band.query.all()
 
-    result = band_schema.dump(bands_list)
+    result = bands_schema.dump(bands_list)
 
     return jsonify(result)

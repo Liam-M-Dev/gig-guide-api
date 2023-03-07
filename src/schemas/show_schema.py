@@ -6,8 +6,8 @@ class ShowSchema(ma.Schema):
         # fields to be exposed
         fields = ("id", "show_name", "date", "band", "venue")
 
-    band = fields.List(fields.Nested("BandSchema", only=("id", "band_name")))
-    venue = fields.Nested("VenueSchema", only=("id", "venue_name"))
+    band = fields.List(fields.Nested("BandSchema", only=["id", "band_name"]))
+    venue = fields.Nested("VenueSchema", only=["id", "venue_name"])
 
 
 show_schema = ShowSchema()

@@ -24,6 +24,9 @@ def create_app():
     from commands import db_commands
     app.register_blueprint(db_commands)
     
+    
+    from schemas import UserSchema
+
 
     from controllers import registerable_controllers
 
