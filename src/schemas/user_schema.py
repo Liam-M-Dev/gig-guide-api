@@ -7,7 +7,7 @@ class UserSchema(ma.Schema):
         #fields to be exposed
         fields = ("id", "first_name", "last_name", "email", "admin", "attending")
 
-    attending = fields.List(fields.Nested("AttendingSchema"))
+    attending = fields.List(fields.Nested("AttendingSchema", only=["show_id"]))
     # password = ma.String(validate=Length(min=8))
     
 

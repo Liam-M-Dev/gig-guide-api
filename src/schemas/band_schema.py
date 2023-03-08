@@ -1,6 +1,7 @@
 from main import ma
 from marshmallow import fields
 
+
 class BandSchema(ma.Schema):
     class Meta:
         # fields to be exposed
