@@ -121,3 +121,17 @@ def update_user(id):
 
 
     return jsonify(user_schema.dump(user))
+
+
+# Route method to delete user from database
+# method requires user to submit their id, checking that id is authorized 
+# then deleting user and returning message informing user is deleted
+@users.route("/delete/<int:id>", methods=["DELETE"])
+def delete_user(id):
+    
+    user = db.get_or_404(User, id, description="User not found, please check id")
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return "user deleted"

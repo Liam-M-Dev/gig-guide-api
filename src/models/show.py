@@ -17,3 +17,9 @@ class Show(db.Model):
         backref="show",
         cascade="all, delete"
     )
+
+    playing = db.relationship(
+        "Playing",
+        backref="show",
+        cascade="all, delete"
+    )
