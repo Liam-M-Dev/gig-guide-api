@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
-from main import db, bcrypt
+from marshmallow.exceptions import ValidationError
+from main import db, bcrypt, ma
 from models.user import User
 from models.attending import Attending
 from schemas.user_schema import user_schema, users_schema
@@ -46,5 +47,46 @@ def user_login():
         return abort(401, "Incorrect password or email")
     
     return "Password accepted"
+
+
+# Post method to register new user into database,
+# Takes user fields through input via JSON on postman/insomnia
+# Returns user token and registration message
+@users.route("/register", methods=["POST"])
+def user_register():
+    try:
+        user_fields = user_schema.load(request.json)
+
+        
+        # Filter user emails to confirm email is not already in use
+        user = User.query.filter_by(email=user_fields["email"]).first()
+        # If email is in use, send error message to login or create new account
+        if user:
+            return abort(401, description="Email is already in use, \
+                        please login with email or create a new account")
+        
+        user = User()
+
+        
+        user.first_name = user_fields["first_name"]
+        user.last_name = user_fields["last_name"]
+        user.email = user_fields["email"]
+        user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
+        user.admin = False
+    
+
+    
+    
+    
+        db.session.add(user)
+        
+        db.session.commit()
+        return jsonify(user_schema.dump(user))
+    except ValidationError:
+        return abort(401, description="Incorrect user fields entered")
+
+    
+
+
 
     
