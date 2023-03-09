@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, abort
-from main import db
+from main import db, bcrypt
 from models.user import User
 from models.attending import Attending
 from schemas.user_schema import user_schema, users_schema
@@ -23,11 +23,28 @@ def get_users():
 
 
 # Get method for displaying contents of attending table
-# @users.route("/attending/show")
-# def get_attendees():
+@users.route("/attending/show")
+def get_attendees():
 
-#     attendees_list = Attending.query.all()
+    attendees_list = Attending.query.all()
 
-#     result = attending_schemas.dump(attendees_list)
+    result = attending_schemas.dump(attendees_list)
 
-#     return jsonify(result)
+    return jsonify(result)
+
+
+# Post method to allow users to login to the api
+# returns user details and JSON web token for authentication
+@users.route("/login", methods=["POST"])
+def user_login():
+    # collect schema to load user request into json object
+    user_fields = user_schema.load(request.json)
+
+    user = User.query.filter_by(email=user_fields["email"]).first()
+
+    if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):
+        return abort(401, "Incorrect password or email")
+    
+    return "Password accepted"
+
+    
