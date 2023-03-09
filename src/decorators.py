@@ -1,9 +1,10 @@
 from functools import wraps
 from flask import abort
+from flask_jwt_extended import create_access_token
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
-
+# Error handler decorator to catch various errors within server and client
 def error_handlers(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

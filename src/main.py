@@ -1,12 +1,14 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
+from flask_sqlalchemy import SQLAlchemy
 
 
 db = SQLAlchemy()
 ma = Marshmallow()
 bcrypt = Bcrypt()
+jwt = JWTManager()
 
 def create_app():
     # create the initial app instance
@@ -21,9 +23,11 @@ def create_app():
     # create the serialization within the app
     ma.init_app(app)
 
-    # Implment bcrypt function within the app
+    # Initialize bcrypt object within app
     bcrypt.init_app(app)
 
+    # Initialize JWT object within app
+    jwt.init_app(app)
 
     # register commands into the application
     from commands import db_commands

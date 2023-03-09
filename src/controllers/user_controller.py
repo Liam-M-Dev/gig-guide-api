@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from datetime import timedelta
 from decorators import error_handlers
 from main import db, bcrypt
 from models.user import User
@@ -47,7 +49,10 @@ def user_login():
     .check_password_hash(user.password, user_fields["password"]):
         return abort(401, "Incorrect password or email")
     
-    return "Password accepted"
+    expiry = timedelta(days=1)
+    access_token = create_access_token(identity=str(user.id), expires_delta=expiry)
+    
+    return jsonify({"user" : user.email, "token" : access_token})
 
 
 # Post method to register new user into database,
@@ -81,7 +86,10 @@ def user_register():
     db.session.commit()
     
     
-    return jsonify(user_schema.dump(user))
+    expiry = timedelta(days=1)
+    access_token = create_access_token(identity=str(user.id), expires_delta=expiry)
+    
+    return jsonify({"user" : user.email, "token" : access_token})
     
     
 
