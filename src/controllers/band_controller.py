@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from decorators import error_handlers
 from main import db
 from models.band import Band
 from models.playing import Playing
+from models.user import User
 from schemas.band_schema import band_schema, bands_schema
 from schemas.playing_schema import playing_schema, playing_schemas
 
@@ -32,3 +35,50 @@ def get_bands_playing():
     result = playing_schemas.dump(playing_list)
 
     return jsonify(result)
+
+
+# Get method to return a single band
+# Method takes an integer as the id number
+# returns a json object with the band information,
+# including associated shows they own/are playing
+@bands.route("/display_single/<int:id>", methods=["GET"])
+@error_handlers
+def get_singe_band(id):
+    
+    band = db.get_or_404(Band, id, description="Band not found, please check id")
+
+    return jsonify(band_schema.dump(band))
+
+
+# Post method to create band within database
+# method takes an integer as id number to authenticate user
+# method takes band fields to serialize into database
+# returns band fields as json object to confirm band creation
+@bands.route("/create/<int:id>", methods=["POST"])
+@jwt_required()
+@error_handlers
+def band_creation(id):
+
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, id, description="Invalid user, please check id")
+
+
+
+    band_fields = band_schema.load(request.json)
+
+    band = Band.query.filter_by(band_name=band_fields["band_name"]).first()
+    if band:
+        return abort(401, description="Sorry band name already in use")
+
+    band = Band()
+
+    band.band_name = band_fields["band_name"]
+    band.genre = band_fields["genre"]
+    band.state = band_fields["state"]
+    band.user_id = user.id
+
+    db.session.add(band)
+    db.session.commit()
+
+    return jsonify(band_schema.dump(band))

@@ -55,8 +55,6 @@ def display_user(id, user_id):
     return jsonify(user_schema.dump(display_user))
 
 
-
-
 # Get method for displaying contents of attending table
 @users.route("/attending/show", methods=["GET"])
 def get_attendees():
@@ -122,10 +120,8 @@ def user_register():
     access_token = create_access_token(identity=str(user.id), expires_delta=expiry)
     
     return jsonify({"user" : user.email, "token" : access_token})
-    
-    
 
-    
+
 # Route for updating users details
 # Takes ID of user and then user fields
 # returns updated data to the user in JSON format

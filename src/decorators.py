@@ -1,6 +1,8 @@
 from functools import wraps
 from flask import abort
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from main import db
+from models.user import User
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
@@ -21,3 +23,13 @@ def error_handlers(func):
                             seed before continuing")
         return response
     return wrapper
+
+
+# User Id decorator to get user identity
+# def get_user_id(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         user = get_jwt_identity()
+
+#         user = db.get_or_404(User, id, description="User not found, please check id")
+#         func(*args, *kwargs)
