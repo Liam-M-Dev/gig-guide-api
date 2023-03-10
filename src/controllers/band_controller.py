@@ -82,3 +82,33 @@ def band_creation(id):
     db.session.commit()
 
     return jsonify(band_schema.dump(band))
+
+
+# Put method to update bands information
+# requires jwt to allow user to update the band they own
+# requires user identity to ensure user has access to the band
+# takes user fields band name, genre, state
+# returns json object of updated band
+@bands.route("/update/<int:id>/<int:band_id>", methods=["PUT"])
+@jwt_required()
+@error_handlers
+def update_band(id, band_id):
+    user = get_jwt_identity()
+    band_fields = band_schema.load(request.json)
+    user = db.get_or_404(User, id, description="Invalid user, please check id")
+
+    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
+
+    
+
+    if user.id != band.user_id:
+        return abort(401, description="Sorry you do not have access to this band")
+    
+    band.band_name = band_fields["band_name"]
+    band.genre = band_fields["genre"]
+    band.state = band_fields["state"]
+    band.user_id = band.user_id
+
+    db.session.commit()
+
+    return jsonify(band_schema.dump(band))
