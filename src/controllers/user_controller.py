@@ -15,14 +15,46 @@ users = Blueprint("user", __name__, url_prefix="/users")
 # Get method for accessing all users and shows attendance,
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
-@users.route("/", methods=["GET"])
-def get_users():
+@users.route("/<int:id>", methods=["GET"])
+@jwt_required()
+def get_users(id):
+
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, id, description="User not found, please check id")
+
+    if not user.admin:
+        return abort(401, description="Unauthorized user, please login as admin to see user list")
 
     users_list = User.query.all()
 
     result = users_schema.dump(users_list)
 
     return jsonify(result)
+
+
+# Get method for displaying single user, including bands and venues they own
+# Function takes user Id to and authenticates through JWT to ensure 
+# user is authorized/authenticated.
+# returns user information within json object
+@users.route("/display_user/<int:id>/<int:user_id>", methods=["GET"])
+@jwt_required()
+def display_user(id, user_id):
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, id, description="User not found, please check id")
+
+    display_user = db.get_or_404(User, user_id, description="User not found, please check id")
+
+    if not user:
+        return abort(401, description="Invalid user, please try again")
+    
+    if user.id != display_user.id:
+        return abort(401, description="Invalid user id, please enter correct id")
+
+    return jsonify(user_schema.dump(display_user))
+
+
 
 
 # Get method for displaying contents of attending table
@@ -99,9 +131,12 @@ def user_register():
 # returns updated data to the user in JSON format
 @users.route("/update/<int:id>", methods=["PUT"])
 @error_handlers
+@jwt_required()
 def update_user(id):
-    pass
+
     user_fields = user_schema.load(request.json)
+    
+    user = get_jwt_identity()
 
     user = db.get_or_404(User, id, description="User not found, please check id")
 
@@ -123,11 +158,21 @@ def update_user(id):
 # method requires user to submit their id, checking that id is authorized 
 # then deleting user and returning message informing user is deleted
 @users.route("/delete/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_user(id):
     
+    user = get_jwt_identity()
+    
+
     user = db.get_or_404(User, id, description="User not found, please check id")
 
-    db.session.delete(user)
-    db.session.commit()
+    if not user:
+        return abort(401, description="Invalid User, please check ID")
+    elif user.admin and not user:
+        db.session.delete(user)
+        db.session.commit()
+    else:
+        db.session.delete(user)
+        db.session.commit()
 
     return "user deleted"
