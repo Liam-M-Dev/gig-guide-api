@@ -41,7 +41,7 @@ def get_bands_playing():
 # Method takes an integer as the id number
 # returns a json object with the band information,
 # including associated shows they own/are playing
-@bands.route("/display_single/<int:id>", methods=["GET"])
+@bands.route("/display/band/<int:id>", methods=["GET"])
 @error_handlers
 def get_singe_band(id):
     
@@ -112,3 +112,33 @@ def update_band(id, band_id):
     db.session.commit()
 
     return jsonify(band_schema.dump(band))
+
+
+# Delete route to allow a user to delete their band
+# requires user id and band id plus jwt authentication
+# checks that user owns band before deletion
+# deletes band and returns message of band deleted
+@bands.route("/delete/<int:user_id>/<int:band_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def delete_band(user_id, band_id):
+
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, user_id, description="Invalid user, please check id")
+
+    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
+
+    if user.id != band.user_id and not user.admin:
+        return abort(401, description="Sorry you do not have access to this band")
+    elif user.admin and not user.id != band.user_id:
+        db.session.delete(band)
+        db.session.commit()
+    else:
+        db.session.delete(band)
+        db.session.commit()
+
+    return jsonify({"msg": "user deleted"})
+
+
+# Post route to allow bands to regis
