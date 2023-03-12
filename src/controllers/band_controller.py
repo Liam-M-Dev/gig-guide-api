@@ -138,7 +138,7 @@ def delete_band(user_id, band_id):
         db.session.delete(band)
         db.session.commit()
 
-    return jsonify({"msg": "user deleted"})
+    return jsonify({"msg": "band deleted"})
 
 
 # Post route to allow bands to regis

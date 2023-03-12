@@ -51,7 +51,7 @@ def display_venue(id):
 @venues.route("/register/<int:id>", methods=["POST"])
 @jwt_required()
 @error_handlers
-def band_creation(id):
+def venue_creation(id):
 
     user = get_jwt_identity()
 
@@ -104,3 +104,29 @@ def update_venue(user_id, venue_id):
     db.session.commit()
 
     return jsonify(venue_schema.dump(venue))
+
+# Delete route to allow a user to delete their venue
+# requires user id and venue id plus jwt authentication
+# checks that user owns venue before deletion or user is an admin
+# deletes venue and returns json format of message "venue deleted"
+@venues.route("/delete/<int:user_id>/<int:venue_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def delete_venue(user_id, venue_id):
+
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, user_id, description="Invalid user, please check id")
+
+    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
+
+    if user.id != venue.user_id and not user.admin:
+        return abort(401, description="Sorry you do not have access to this venue")
+    elif user.admin and not user.id != venue.user_id:
+        db.session.delete(venue)
+        db.session.commit()
+    else:
+        db.session.delete(venue)
+        db.session.commit()
+
+    return jsonify({"msg": "venue deleted"})

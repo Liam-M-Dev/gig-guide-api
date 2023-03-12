@@ -8,7 +8,7 @@ class Show(db.Model):
     show_name = db.Column(db.String(),nullable=False)
     date = db.Column(db.String(),nullable=False)
     band_id = db.Column(db.Integer,db.ForeignKey("BANDS.id"),
-                        nullable=False)
+                        nullable=True)
     venue_id = db.Column(db.Integer,db.ForeignKey("VENUES.id"),
                         nullable=False)
     

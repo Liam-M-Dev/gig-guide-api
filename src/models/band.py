@@ -14,7 +14,6 @@ class Band(db.Model):
     shows = db.relationship(
         "Show",
         backref="band",
-        cascade="all, delete"
     )
 
     playing = db.relationship(
