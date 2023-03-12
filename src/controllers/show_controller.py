@@ -167,3 +167,51 @@ def update_show_band(band_id, show_id):
     db.session.commit()
 
     return jsonify(show_schema.dump(show))
+
+
+# Delete route to allow a user to delete their venue
+# requires user id and venue id plus jwt authentication
+# checks that user owns venue before deletion or user is an admin
+# deletes venue and returns json format of message "venue deleted"
+@shows.route("/delete/show/venue/<int:venue_id>/<int:show_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def delete_show_venue(venue_id, show_id):
+
+    venue = get_jwt_identity()
+
+    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
+
+    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
+
+    if venue.id != show.venue_id:
+        return abort(401, description="Sorry you do not have access to this show")
+    
+    db.session.delete(show)
+    db.session.commit()
+
+    return jsonify({"msg": "show deleted"})
+
+
+# Delete route to allow a user to delete their venue
+# requires user id and venue id plus jwt authentication
+# checks that user owns venue before deletion or user is an admin
+# deletes venue and returns json format of message "venue deleted"
+@shows.route("/delete/show/band/<int:band_id>/<int:show_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def delete_show_band(band_id, show_id):
+
+    band = get_jwt_identity()
+
+    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
+
+    band = db.get_or_404(Band, band_id, description="Invalid venue id, please check band id")
+
+    if band.id != show.band_id:
+        return abort(401, description="Sorry you do not have access to this show")
+    
+    db.session.delete(show)
+    db.session.commit()
+
+    return jsonify({"msg": "show deleted"})

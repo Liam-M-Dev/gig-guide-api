@@ -56,7 +56,7 @@ def venue_creation(id):
     user = get_jwt_identity()
 
     user = db.get_or_404(User, id, description="Invalid user, please check id")
-    
+
     venue_fields = venue_schema.load(request.json)
 
     venue = Venue.query.filter_by(venue_name=venue_fields["venue_name"]).first()
@@ -102,6 +102,7 @@ def update_venue(user_id, venue_id):
     db.session.commit()
 
     return jsonify(venue_schema.dump(venue))
+
 
 # Delete route to allow a user to delete their venue
 # requires user id and venue id plus jwt authentication
