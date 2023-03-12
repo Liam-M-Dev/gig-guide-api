@@ -56,9 +56,7 @@ def venue_creation(id):
     user = get_jwt_identity()
 
     user = db.get_or_404(User, id, description="Invalid user, please check id")
-
-
-
+    
     venue_fields = venue_schema.load(request.json)
 
     venue = Venue.query.filter_by(venue_name=venue_fields["venue_name"]).first()

@@ -51,7 +51,7 @@ def display_show(id):
 @shows.route("/create/show/venue/<int:id>", methods=["POST"])
 @jwt_required()
 @error_handlers
-def show_creation(id):
+def show_creation_venue(id):
 
     venue = get_jwt_identity()
 
@@ -81,10 +81,10 @@ def show_creation(id):
 # method takes data input via fields for show name, date, band_id
 # sets shows venue id to the venue id
 # returns json object of show data
-@shows.route("/create/show/venue/<int:id>", methods=["POST"])
+@shows.route("/create/show/band/<int:id>", methods=["POST"])
 @jwt_required()
 @error_handlers
-def show_creation(id):
+def show_creation_band(id):
 
     band = get_jwt_identity()
 
@@ -101,9 +101,69 @@ def show_creation(id):
     show.show_name = show_fields["show_name"]
     show.date = show_fields["date"]
     show.band_id = band.id
-    show.venue_id = show_fields["show_id"]
+    show.venue_id = show_fields["venue_id"]
 
     db.session.add(show)
+    db.session.commit()
+
+    return jsonify(show_schema.dump(show))
+
+
+# Put method to allow venues to update show
+# method takes venue identity and show identity
+# venue identity is to authenticate and ensure venue is authorized to access show
+# fields are edited via input of dictionary data
+# returns updated show information as json object
+@shows.route("/update/show/venue/<int:venue_id>/<int:show_id>", methods=["PUT"])
+@jwt_required()
+@error_handlers
+def update_show_venue(venue_id, show_id):
+    venue = get_jwt_identity()
+    show_fields = show_schema.load(request.json)
+    
+    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
+
+    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
+
+    if venue.id != show.venue_id:
+        return abort(401, description="Sorry you do not have access to this show")
+    
+    show.show_name = show_fields["show_name"]
+    show.date = show_fields["date"]
+    show.band_id = show_fields["band_id"]
+    show.venue_id = venue.id
+    
+
+    db.session.commit()
+
+    return jsonify(show_schema.dump(show))
+
+
+# Put method to allow bands to update show
+# method takes band identity and show identity
+# band identity is to authenticate and ensure band is authorized to access show
+# fields are edited via input of dictionary data
+# returns updated show information as json object
+@shows.route("/update/show/band/<int:band_id>/<int:show_id>", methods=["PUT"])
+@jwt_required()
+@error_handlers
+def update_show_band(band_id, show_id):
+    band = get_jwt_identity()
+    show_fields = show_schema.load(request.json)
+    
+    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
+
+    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
+
+    if band.id != show.band_id:
+        return abort(401, description="Sorry you do not have access to this show")
+    
+    show.show_name = show_fields["show_name"]
+    show.date = show_fields["date"]
+    show.band_id = band.id
+    show.venue_id = show_fields["venue_id"]
+    
+
     db.session.commit()
 
     return jsonify(show_schema.dump(show))
