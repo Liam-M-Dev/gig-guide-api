@@ -171,4 +171,51 @@ def delete_user(id):
         db.session.delete(user)
         db.session.commit()
 
-    return "user deleted"
+    return { "message" : "user deleted" }, 200
+
+
+# Post method to allow users to attend an upcoming show
+# method takes user id to authenticate user
+# method takes the show_id as a field to validate through schema
+# returns json object of the upcoming show attendance
+@users.route("/attending/register/<int:id>", methods=["POST"])
+@jwt_required()
+@error_handlers
+def register_attendance(id):
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, id, description="User not found")
+
+    attending_fields = attending_schema.load(request.json)
+
+    attending = Attending()
+
+    attending.user_id = user.id
+    attending.show_id = attending_fields["show_id"]
+
+    db.session.add(attending)
+    db.session.commit()
+
+    return jsonify(attending_schema.dump(attending))
+
+
+# Delete method to allow users to remove attendance from a show
+# method takes user identity and attending id
+# removes attendance record and returns json message "attendance deleted"
+@users.route("/attending/remove/<int:id>/<int:attending_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def remove_attendance(id, attending_id):
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, id, description="User not found")
+
+    attending = db.get_or_404(Attending, attending_id, description="record not found")
+
+    if user.id != attending.user_id:
+        return {"message" : "Sorry you do not have access to this attendance"}, 401
+    
+    db.session.delete(attending)
+    db.session.commit()
+
+    return {"message" : "attendance removed"}
