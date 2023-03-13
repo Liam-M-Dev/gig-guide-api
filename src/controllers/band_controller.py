@@ -1,12 +1,13 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from decorators import error_handlers
+import json
 from main import db
 from models.band import Band
 from models.playing import Playing
 from models.user import User
 from models.show import Show
-from schemas.band_schema import band_schema, bands_schema
+from schemas.band_schema import band_schema, bands_schema, BandSchema
 from schemas.playing_schema import playing_schema, playing_schemas
 
 
@@ -49,6 +50,24 @@ def get_singe_band(id):
     band = db.get_or_404(Band, id, description="Band not found, please check id")
 
     return jsonify(band_schema.dump(band))
+
+
+# Get method to return bands that play a similar genre of music
+# method takes a string as the genre of music
+# returns list of json object bands with name, genre and state
+@bands.route("/display/search", methods=["GET"])
+def genre_list_bands():
+
+    band_list = []
+
+    if request.args.get("genre"):
+        band_list = Band.query.filter_by(genre= request.args.get("genre"))
+    elif request.args.get("state"):
+        band_list = Band.query.filter_by(state= request.args.get("state"))
+
+    band_display = BandSchema(only=["band_name", "shows"], many=True)
+
+    return jsonify(band_display.dump(band_list))
 
 
 # Post method to create band within database
@@ -199,4 +218,4 @@ def remove_playing(user_id, band_id, playing_id):
     db.session.delete(playing)
     db.session.commit()
 
-    return {"message" : "Removed from up coming show"}
+    return {"message" : "Removed from up coming show"}, 200
