@@ -18,7 +18,7 @@ shows = Blueprint("shows", __name__, url_prefix="/shows")
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
 @shows.route("/", methods=["GET"])
-def get_bands():
+def get_shows():
 
     shows_list = Show.query.all()
 
@@ -41,6 +41,23 @@ def display_show(id):
     venue_display = VenueSchema(only=["venue_name", "location"])
 
     return jsonify(show_display.dump(show), venue_display.dump(venue))
+
+
+@shows.route("/display/search", methods=["GET"])
+@error_handlers
+def search_shows():
+
+    shows_list = []
+    band_list = []
+
+    if request.args.get("venue"):
+        shows_list = Show.query.filter_by(venue_id = request.args.get("venue"))
+    elif request.args.get("band"):
+        shows_list = Show.query.filter_by(band_id = request.args.get("band"))
+
+    shows_display = ShowSchema(only=["show_name", "date"], many=True)
+
+    return jsonify(shows_display.dump(shows_list))
 
 
 # Post method to allow user to create a new show
