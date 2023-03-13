@@ -5,16 +5,18 @@ from decorators import error_handlers
 from main import db, bcrypt
 from models.user import User
 from models.attending import Attending
-from schemas.user_schema import user_schema, users_schema
+from schemas.user_schema import user_schema, UserSchema
 from schemas.attending_schema import attending_schema, attending_schemas
 
 
 users = Blueprint("user", __name__, url_prefix="/users")
 
 
-# Get method for accessing all users and shows attendance,
-# will implement Authorization in a bit and change attendance 
-# from being viewable for admin
+# Get method for accessing all users
+# Initial user has to be admin to be allowed to view the list of users
+# method takes the id of the admin which is 1
+# method returns serialized information of users.
+# only id, first and last names, and email
 @users.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_users(id):
@@ -28,9 +30,9 @@ def get_users(id):
 
     users_list = User.query.all()
 
-    result = users_schema.dump(users_list)
+    result = UserSchema(only=["id", "first_name", "last_name", "email"], many=True)
 
-    return jsonify(result)
+    return jsonify(result.dump(users_list))
 
 
 # Get method for displaying single user, including bands and venues they own
@@ -51,6 +53,7 @@ def display_user(id, user_id):
     
     if user.id != display_user.id:
         return abort(401, description="Invalid user id, please enter correct id")
+    
 
     return jsonify(user_schema.dump(display_user))
 
