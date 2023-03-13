@@ -7,10 +7,8 @@ class Show(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     show_name = db.Column(db.String(),nullable=False)
     date = db.Column(db.String(),nullable=False)
-    band_id = db.Column(db.Integer,db.ForeignKey("BANDS.id"),
-                        nullable=True)
-    venue_id = db.Column(db.Integer,db.ForeignKey("VENUES.id"),
-                        nullable=False)
+    band_id = db.Column(db.Integer,db.ForeignKey("BANDS.id", ondelete="SET NULL"), nullable=True)
+    venue_id = db.Column(db.Integer,db.ForeignKey("VENUES.id", ondelete="SET NULL"), nullable=True)
     
     attending = db.relationship(
         "Attending",

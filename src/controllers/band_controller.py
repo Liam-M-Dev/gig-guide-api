@@ -5,6 +5,7 @@ from main import db
 from models.band import Band
 from models.playing import Playing
 from models.user import User
+from models.show import Show
 from schemas.band_schema import band_schema, bands_schema
 from schemas.playing_schema import playing_schema, playing_schemas
 
@@ -141,4 +142,61 @@ def delete_band(user_id, band_id):
     return jsonify({"msg": "band deleted"})
 
 
-# Post route to allow bands to regis
+# Post route to allow bands to register themselves to an upcoming gig
+# method takes the bands id and the show id they wish to register too
+# returns json object of playing with band id and show id
+@bands.route("/playing/register/<int:user_id>/<int:band_id>", methods=["POST"])
+@error_handlers
+@jwt_required()
+def register_to_show(user_id, band_id):
+
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, user_id, description="Invalid user id")
+
+    band = db.get_or_404(Band, band_id, description="Invalid band id")
+
+    if user.id != band.user_id:
+        return abort(401, description="Sorry you do not have access to this band")
+    
+    playing_fields = playing_schema.load(request.json)
+    playing = Playing()
+
+    playing.band_id = band.id
+    playing.show_id = playing_fields["show_id"]
+
+    show = Show.query.filter_by(id=playing_fields["show_id"]).first()
+    if not show:
+        return {"message" : "Sorry this show does not exist, please check id"}, 404
+
+    db.session.add(playing)
+    db.session.commit()
+
+    return jsonify(playing_schema.dump(playing))
+
+
+# Delete method to allow bands to remove themselves from playing a show
+# method takes user id and band id to authenticate and ensure access to band
+# returns message of removed from show to let the band know it has gone through
+@bands.route("/playing/remove/<int:user_id>/<int:band_id>/<int:playing_id>", methods=["DELETE"])
+@jwt_required()
+@error_handlers
+def remove_playing(user_id, band_id, playing_id):
+    user = get_jwt_identity()
+
+    user = db.get_or_404(User, user_id, description="Invalid user id")
+
+    band = db.get_or_404(Band, band_id, description="Invalid band id")
+
+    if user.id != band.user_id:
+        return {"message" : "Sorry you do not have access to this band"}, 401
+    
+    playing = db.get_or_404(Playing, playing_id, description="Playing not found, please check id")
+    
+    if playing.band_id != band.id:
+        return {"message" : "Sorry you do not have access to this record"}, 401
+
+    db.session.delete(playing)
+    db.session.commit()
+
+    return {"message" : "Removed from up coming show"}
