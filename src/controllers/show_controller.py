@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from decorators import error_handlers
+from decorators.error_decorator import error_handlers
 from main import db
 from models.band import Band
 from models.show import Show

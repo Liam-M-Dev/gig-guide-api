@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import timedelta
-from decorators import error_handlers
+from decorators.error_decorator import error_handlers
+from decorators.user_login import get_admin_user, get_user_fromdb
 from main import db, bcrypt
 from models.user import User
 from models.attending import Attending
@@ -18,16 +19,11 @@ users = Blueprint("user", __name__, url_prefix="/users")
 # method returns serialized information of users.
 # only id, first and last names, and email
 @users.route("/<int:id>", methods=["GET"])
-@jwt_required()
+# @jwt_required()
+@get_admin_user
 def get_users(id):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, id, description="User not found, please check id")
-
-    if not user.admin:
-        return abort(401, description="Unauthorized user, please login as admin to see user list")
-
+    # user = get_jwt_identity()
     users_list = User.query.all()
 
     result = UserSchema(only=["id", "first_name", "last_name", "email"], many=True)
@@ -39,23 +35,11 @@ def get_users(id):
 # Function takes user Id to and authenticates through JWT to ensure 
 # user is authorized/authenticated.
 # returns user information within json object
-@users.route("/display_user/<int:id>/<int:user_id>", methods=["GET"])
-@jwt_required()
-def display_user(id, user_id):
-    user = get_jwt_identity()
+@users.route("/display_user/<int:user_id>", methods=["GET"])
+@get_user_fromdb
+def display_user(user):
 
-    user = db.get_or_404(User, id, description="User not found, please check id")
-
-    display_user = db.get_or_404(User, user_id, description="User not found, please check id")
-
-    if not user:
-        return abort(401, description="Invalid user, please try again")
-    
-    if user.id != display_user.id:
-        return abort(401, description="Invalid user id, please enter correct id")
-    
-
-    return jsonify(user_schema.dump(display_user))
+    return jsonify(user_schema.dump(user))
 
 
 # Get method for displaying contents of attending table
@@ -128,17 +112,13 @@ def user_register():
 # Route for updating users details
 # Takes ID of user and then user fields
 # returns updated data to the user in JSON format
-@users.route("/update/<int:id>", methods=["PUT"])
-@error_handlers
-@jwt_required()
-def update_user(id):
+@users.route("/update/<int:user_id>", methods=["PUT"])
+# @error_handlers
+@get_user_fromdb
+def update_user(user):
 
     user_fields = user_schema.load(request.json)
     
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, id, description="User not found, please check id")
-
     user.first_name = user_fields["first_name"]
     user.last_name = user_fields["last_name"]
     user.email = user_fields["email"]
@@ -156,17 +136,13 @@ def update_user(id):
 # Route method to delete user from database
 # method requires user to submit their id, checking that id is authorized 
 # then deleting user and returning message informing user is deleted
-@users.route("/delete/<int:id>", methods=["DELETE"])
-@jwt_required()
-@error_handlers
-def delete_user(id):
-    
-    user = get_jwt_identity()
-    
+@users.route("/delete/<int:user_id>/<int:id>", methods=["DELETE"])
+@get_user_fromdb
+# @error_handlers
+def delete_user(user, id,):
 
-    user = db.get_or_404(User, id, description="User not found, please check id")
 
-    if not user:
+    if user.id != id:
         return abort(401, description="Invalid User, please check ID")
     elif user.admin and not user:
         db.session.delete(user)
