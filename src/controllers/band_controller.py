@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from decorators import error_handlers
-import json
+from decorators.decorators import error_handlers
+
 from main import db
 from models.band import Band
 from models.playing import Playing
@@ -56,6 +56,7 @@ def get_singe_band(id):
 # method takes a string as the genre of music
 # returns list of json object bands with name, genre and state
 @bands.route("/display/search", methods=["GET"])
+@error_handlers
 def genre_list_bands():
 
     band_list = []
@@ -82,8 +83,6 @@ def band_creation(id):
     user = get_jwt_identity()
 
     user = db.get_or_404(User, id, description="Invalid user, please check id")
-
-
 
     band_fields = band_schema.load(request.json)
 
@@ -118,8 +117,6 @@ def update_band(id, band_id):
     user = db.get_or_404(User, id, description="Invalid user, please check id")
 
     band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
-
-    
 
     if user.id != band.user_id:
         return abort(401, description="Sorry you do not have access to this band")
@@ -158,7 +155,7 @@ def delete_band(user_id, band_id):
         db.session.delete(band)
         db.session.commit()
 
-    return jsonify({"msg": "band deleted"})
+    return {"message": "band deleted"}, 200
 
 
 # Post route to allow bands to register themselves to an upcoming gig
@@ -210,7 +207,7 @@ def remove_playing(user_id, band_id, playing_id):
     if user.id != band.user_id:
         return {"message" : "Sorry you do not have access to this band"}, 401
     
-    playing = db.get_or_404(Playing, playing_id, description="Playing not found, please check id")
+    playing = db.get_or_404(Playing, playing_id, description="something went wrong, please check id")
     
     if playing.band_id != band.id:
         return {"message" : "Sorry you do not have access to this record"}, 401

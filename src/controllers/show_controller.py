@@ -48,7 +48,6 @@ def display_show(id):
 def search_shows():
 
     shows_list = []
-    band_list = []
 
     if request.args.get("venue"):
         shows_list = Show.query.filter_by(venue_id = request.args.get("venue"))

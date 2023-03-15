@@ -158,6 +158,7 @@ def update_user(id):
 # then deleting user and returning message informing user is deleted
 @users.route("/delete/<int:id>", methods=["DELETE"])
 @jwt_required()
+@error_handlers
 def delete_user(id):
     
     user = get_jwt_identity()
@@ -221,4 +222,4 @@ def remove_attendance(id, attending_id):
     db.session.delete(attending)
     db.session.commit()
 
-    return {"message" : "attendance removed"}
+    return {"message" : "attendance removed"}, 200
