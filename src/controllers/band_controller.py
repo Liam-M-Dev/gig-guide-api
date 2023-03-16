@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from decorators.error_decorator import error_handlers
-
+from decorators.user_login import get_user_fromdb
+from decorators.band_decorator import get_band_fromdb
 from main import db
 from models.band import Band
 from models.playing import Playing
@@ -75,14 +76,13 @@ def genre_list_bands():
 # method takes an integer as id number to authenticate user
 # method takes band fields to serialize into database
 # returns band fields as json object to confirm band creation
-@bands.route("/create/<int:id>", methods=["POST"])
-@jwt_required()
-@error_handlers
-def band_creation(id):
+@bands.route("/create", methods=["POST"])
+# @jwt_required()
+# @error_handlers
+@get_user_fromdb
+def band_creation(**kwargs):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, id, description="Invalid user, please check id")
+    user = kwargs["user"]
 
     band_fields = band_schema.load(request.json)
 
@@ -108,15 +108,16 @@ def band_creation(id):
 # requires user identity to ensure user has access to the band
 # takes user fields band name, genre, state
 # returns json object of updated band
-@bands.route("/update/<int:id>/<int:band_id>", methods=["PUT"])
-@jwt_required()
-@error_handlers
-def update_band(id, band_id):
-    user = get_jwt_identity()
-    band_fields = band_schema.load(request.json)
-    user = db.get_or_404(User, id, description="Invalid user, please check id")
+@bands.route("/update/<int:band_id>", methods=["PUT"])
+# @error_handlers
+@get_user_fromdb
+@get_band_fromdb
+def update_band(**kwargs):
+    user = kwargs["user"]
 
-    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
+    band_fields = band_schema.load(request.json)
+    
+    band = kwargs["band"]
 
     if user.id != band.user_id:
         return abort(401, description="Sorry you do not have access to this band")
@@ -135,16 +136,14 @@ def update_band(id, band_id):
 # requires user id and band id plus jwt authentication
 # checks that user owns band before deletion
 # deletes band and returns message of band deleted
-@bands.route("/delete/<int:user_id>/<int:band_id>", methods=["DELETE"])
-@jwt_required()
-@error_handlers
-def delete_band(user_id, band_id):
+@bands.route("/delete/<int:band_id>", methods=["DELETE"])
+# @error_handlers
+@get_user_fromdb
+@get_band_fromdb
+def delete_band(**kwargs):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, user_id, description="Invalid user, please check id")
-
-    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
+    user = kwargs["user"]
+    band = kwargs["band"]
 
     if user.id != band.user_id and not user.admin:
         return abort(401, description="Sorry you do not have access to this band")
@@ -161,16 +160,14 @@ def delete_band(user_id, band_id):
 # Post route to allow bands to register themselves to an upcoming gig
 # method takes the bands id and the show id they wish to register too
 # returns json object of playing with band id and show id
-@bands.route("/playing/register/<int:user_id>/<int:band_id>", methods=["POST"])
+@bands.route("/playing/register/<int:band_id>", methods=["POST"])
 @error_handlers
-@jwt_required()
-def register_to_show(user_id, band_id):
+@get_user_fromdb
+@get_band_fromdb
+def register_to_show(**kwargs):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, user_id, description="Invalid user id")
-
-    band = db.get_or_404(Band, band_id, description="Invalid band id")
+    user = kwargs["user"]
+    band = kwargs["band"]
 
     if user.id != band.user_id:
         return abort(401, description="Sorry you do not have access to this band")
@@ -194,19 +191,20 @@ def register_to_show(user_id, band_id):
 # Delete method to allow bands to remove themselves from playing a show
 # method takes user id and band id to authenticate and ensure access to band
 # returns message of removed from show to let the band know it has gone through
-@bands.route("/playing/remove/<int:user_id>/<int:band_id>/<int:playing_id>", methods=["DELETE"])
-@jwt_required()
+@bands.route("/playing/remove/<int:band_id>/<int:playing_id>", methods=["DELETE"])
 @error_handlers
-def remove_playing(user_id, band_id, playing_id):
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, user_id, description="Invalid user id")
-
-    band = db.get_or_404(Band, band_id, description="Invalid band id")
+@get_user_fromdb
+@get_band_fromdb
+def remove_playing(**kwargs):
+    
+    user = kwargs["user"]
+    band = kwargs["band"]
 
     if user.id != band.user_id:
         return {"message" : "Sorry you do not have access to this band"}, 401
     
+    playing_id = kwargs["playing_id"]
+
     playing = db.get_or_404(Playing, playing_id, description="something went wrong, please check id")
     
     if playing.band_id != band.id:
