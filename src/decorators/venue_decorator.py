@@ -1,16 +1,16 @@
 from flask import abort, jsonify
 from functools import wraps
-from models.band import Band
+from models.venue import Venue
 
 
-def get_band_fromdb(func):
+def get_venue_fromdb(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            band_id = int(kwargs.get("band_id"))
-            band = Band.query.filter_by(id=band_id).first_or_404(description="Sorry this band does not exist, please check id")
+            venue_id = int(kwargs.get("venue_id"))
+            venue = Venue.query.filter_by(id=venue_id).first_or_404(description="Sorry this venue does not exist, please check id")
 
-            kwargs["band"] = band
+            kwargs["venue"] = venue
 
             return func(*args, **kwargs)
         except TypeError:

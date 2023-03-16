@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request, abort
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from decorators.error_decorator import error_handlers
+from decorators.venue_decorator import get_venue_fromdb
+from decorators.user_login import get_user_fromdb
 from main import db
 from models.venue import Venue
-from models.user import User
 from models.show import Show
 from schemas.venue_schema import venue_schema, venues_schema, VenueSchema
-from schemas.show_schema import show_schema, ShowSchema
+from schemas.show_schema import ShowSchema
 
 
 
@@ -17,7 +17,7 @@ venues = Blueprint("venues", __name__, url_prefix="/venues")
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
 @venues.route("/", methods=["GET"])
-def get_bands():
+def get_venues():
 
     venues_list = Venue.query.all()
 
@@ -48,14 +48,12 @@ def display_venue(id):
 # method takes data input via fields for venue name, location
 # sets venue user id to the users id
 # returns json object of venue data
-@venues.route("/register/<int:id>", methods=["POST"])
-@jwt_required()
+@venues.route("/register/", methods=["POST"])
 @error_handlers
-def venue_creation(id):
+@get_user_fromdb
+def venue_creation(**kwargs):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, id, description="Invalid user, please check id")
+    user = kwargs["user"]
 
     venue_fields = venue_schema.load(request.json)
 
@@ -80,16 +78,16 @@ def venue_creation(id):
 # user identity is to authenticate and ensure user is authorized to access venue
 # fields are edited via input of dictionary data
 # returns updated venue information as json object
-@venues.route("/update/<int:user_id>/<int:venue_id>", methods=["PUT"])
-@jwt_required()
+@venues.route("/update/<int:venue_id>", methods=["PUT"])
 @error_handlers
-def update_venue(user_id, venue_id):
-    user = get_jwt_identity()
+@get_user_fromdb
+@get_venue_fromdb
+def update_venue(**kwargs):
+
+    user = kwargs["user"]
+    venue = kwargs["venue"]
+
     venue_fields = venue_schema.load(request.json)
-    user = db.get_or_404(User, user_id, description="Invalid user, please check id")
-
-    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
-
     
 
     if user.id != venue.user_id:
@@ -108,16 +106,14 @@ def update_venue(user_id, venue_id):
 # requires user id and venue id plus jwt authentication
 # checks that user owns venue before deletion or user is an admin
 # deletes venue and returns json format of message "venue deleted"
-@venues.route("/delete/<int:user_id>/<int:venue_id>", methods=["DELETE"])
-@jwt_required()
+@venues.route("/delete/<int:venue_id>", methods=["DELETE"])
 @error_handlers
-def delete_venue(user_id, venue_id):
+@get_user_fromdb
+@get_venue_fromdb
+def delete_venue(**kwargs):
 
-    user = get_jwt_identity()
-
-    user = db.get_or_404(User, user_id, description="Invalid user, please check id")
-
-    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
+    user = kwargs["user"]
+    venue = kwargs["venue"]
 
     if user.id != venue.user_id and not user.admin:
         return abort(401, description="Sorry you do not have access to this venue")

@@ -1,12 +1,10 @@
 from flask import Blueprint, jsonify, request, abort
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from decorators.error_decorator import error_handlers
 from decorators.user_login import get_user_fromdb
 from decorators.band_decorator import get_band_fromdb
 from main import db
 from models.band import Band
 from models.playing import Playing
-from models.user import User
 from models.show import Show
 from schemas.band_schema import band_schema, bands_schema, BandSchema
 from schemas.playing_schema import playing_schema, playing_schemas
@@ -44,11 +42,12 @@ def get_bands_playing():
 # Method takes an integer as the id number
 # returns a json object with the band information,
 # including associated shows they own/are playing
-@bands.route("/display/band/<int:id>", methods=["GET"])
-@error_handlers
-def get_singe_band(id):
+@bands.route("/display/band/<int:band_id>", methods=["GET"])
+# @error_handlers
+@get_band_fromdb
+def get_single_band(**kwargs):
     
-    band = db.get_or_404(Band, id, description="Band not found, please check id")
+    band = kwargs["band"]
 
     return jsonify(band_schema.dump(band))
 
