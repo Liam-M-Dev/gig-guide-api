@@ -18,12 +18,10 @@ users = Blueprint("user", __name__, url_prefix="/users")
 # method takes the id of the admin which is 1
 # method returns serialized information of users.
 # only id, first and last names, and email
-@users.route("/<int:id>", methods=["GET"])
-# @jwt_required()
+@users.route("/display_users", methods=["GET"])
 @get_admin_user
-def get_users(id):
+def get_users(**kwargs):
 
-    # user = get_jwt_identity()
     users_list = User.query.all()
 
     result = UserSchema(only=["id", "first_name", "last_name", "email"], many=True)
@@ -37,9 +35,16 @@ def get_users(id):
 # returns user information within json object
 @users.route("/display_user/<int:user_id>", methods=["GET"])
 @get_user_fromdb
-def display_user(user):
+def display_user(**kwargs):
 
-    return jsonify(user_schema.dump(user))
+    user = kwargs["user"]
+
+    user_display = db.get_or_404(User, kwargs["user_id"], description="User not found, please check id")
+
+    if user.id != user_display.id:
+        return abort(401, description="Sorry you do not have access to this user")
+
+    return jsonify(user_schema.dump(user_display))
 
 
 # Get method for displaying contents of attending table
@@ -112,12 +117,14 @@ def user_register():
 # Route for updating users details
 # Takes ID of user and then user fields
 # returns updated data to the user in JSON format
-@users.route("/update/<int:user_id>", methods=["PUT"])
+@users.route("/update", methods=["PUT"])
 # @error_handlers
 @get_user_fromdb
-def update_user(user):
+def update_user(**kwargs):
 
     user_fields = user_schema.load(request.json)
+
+    user = kwargs["user"]
     
     user.first_name = user_fields["first_name"]
     user.last_name = user_fields["last_name"]
@@ -136,11 +143,15 @@ def update_user(user):
 # Route method to delete user from database
 # method requires user to submit their id, checking that id is authorized 
 # then deleting user and returning message informing user is deleted
-@users.route("/delete/<int:user_id>/<int:id>", methods=["DELETE"])
+@users.route("/delete/<int:id>", methods=["DELETE"])
 @get_user_fromdb
 # @error_handlers
-def delete_user(user, id,):
+def delete_user(**kwargs):
 
+
+    user = kwargs["user"]
+
+    id = kwargs["id"]
 
     if user.id != id:
         return abort(401, description="Invalid User, please check ID")
