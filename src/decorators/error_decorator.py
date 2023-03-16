@@ -1,7 +1,7 @@
 from functools import wraps
-from flask import abort
+from flask import jsonify
 from marshmallow.exceptions import ValidationError
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, DataError
 
 # Error handler decorator to catch various errors within server and client
 def error_handlers(func):
@@ -10,14 +10,13 @@ def error_handlers(func):
         try:
             response = func(*args, **kwargs)
         except ValidationError:
-            return abort(401, description="Validation error, \
-                          something has gone wrong \
-                          with the fields you have inputted please \
-                          check format and try again")
+            return jsonify({"message" : "Error with validation, ensure all fields are filled out correctly"}), 400
         except ProgrammingError:
-            return abort(500, description="Database is not created, \
-                            please create database and \
-                            seed before continuing")
+            return jsonify({"message" : "Database is not created, please create and seed database first"}), 500
+        except TypeError:
+            return jsonify({"message" : "TypeError within the server"}), 500
+        except DataError:
+            return jsonify({"message" : "Error with the data you are inputting"}), 400
         return response
     return wrapper
 

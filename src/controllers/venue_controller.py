@@ -17,6 +17,7 @@ venues = Blueprint("venues", __name__, url_prefix="/venues")
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
 @venues.route("/", methods=["GET"])
+@error_handlers
 def get_venues():
 
     venues_list = Venue.query.all()
@@ -30,6 +31,7 @@ def get_venues():
 # Method takes venue id
 # returns json object of venue data including upcoming shows
 @venues.route("/display/venue/<int:id>", methods=["GET"])
+@error_handlers
 def display_venue(id):
 
     venue = db.get_or_404(Venue, id, description="Invalid venue id, please check ID")

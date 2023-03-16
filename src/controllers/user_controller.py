@@ -19,6 +19,7 @@ users = Blueprint("user", __name__, url_prefix="/users")
 # method returns serialized information of users.
 # only id, first and last names, and email
 @users.route("/display_users", methods=["GET"])
+@error_handlers
 @get_admin_user
 def get_users(**kwargs):
 
@@ -34,6 +35,7 @@ def get_users(**kwargs):
 # user is authorized/authenticated.
 # returns user information within json object
 @users.route("/display_user/<int:user_id>", methods=["GET"])
+@error_handlers
 @get_user_fromdb
 def display_user(**kwargs):
 
@@ -49,6 +51,7 @@ def display_user(**kwargs):
 
 # Get method for displaying contents of attending table
 @users.route("/attending/show", methods=["GET"])
+@error_handlers
 def get_attendees():
 
     attendees_list = Attending.query.all()
@@ -61,6 +64,7 @@ def get_attendees():
 # Post method to allow users to login to the api
 # returns user details and JSON web token for authentication
 @users.route("/login", methods=["POST"])
+@error_handlers
 def user_login():
     # collect schema to load user request into json object
     user_fields = user_schema.load(request.json)
@@ -118,7 +122,7 @@ def user_register():
 # Takes ID of user and then user fields
 # returns updated data to the user in JSON format
 @users.route("/update", methods=["PUT"])
-# @error_handlers
+@error_handlers
 @get_user_fromdb
 def update_user(**kwargs):
 
@@ -145,7 +149,7 @@ def update_user(**kwargs):
 # then deleting user and returning message informing user is deleted
 @users.route("/delete/<int:id>", methods=["DELETE"])
 @get_user_fromdb
-# @error_handlers
+@error_handlers
 def delete_user(**kwargs):
 
 

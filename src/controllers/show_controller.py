@@ -19,6 +19,7 @@ shows = Blueprint("shows", __name__, url_prefix="/shows")
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
 @shows.route("/", methods=["GET"])
+@error_handlers
 def get_shows():
 
     shows_list = Show.query.all()
@@ -32,6 +33,7 @@ def get_shows():
 # method takes show Id 
 # returns show including the venue
 @shows.route("/display/show/<int:id>", methods=["GET"])
+@error_handlers
 def display_show(id):
 
     show = db.get_or_404(Show, id, description="Sorry no shows found with this id")
@@ -54,6 +56,8 @@ def search_shows():
         shows_list = Show.query.filter_by(venue_id = request.args.get("venue"))
     elif request.args.get("band"):
         shows_list = Show.query.filter_by(band_id = request.args.get("band"))
+    else:
+        return jsonify({"message" : "Incorrect search parameters, please use band or venue"}), 400
 
     shows_display = ShowSchema(only=["show_name", "date"], many=True)
 

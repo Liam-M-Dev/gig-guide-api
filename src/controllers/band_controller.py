@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, abort
 from decorators.error_decorator import error_handlers
 from decorators.user_login import get_user_fromdb
 from decorators.band_decorator import get_band_fromdb
+import json
 from main import db
 from models.band import Band
 from models.playing import Playing
@@ -17,6 +18,7 @@ bands = Blueprint("bands", __name__, url_prefix="/bands")
 # will implement Authorization in a bit and change attendance 
 # from being viewable for admin
 @bands.route("/", methods=["GET"])
+@error_handlers
 def get_bands():
 
     bands_list = Band.query.all()
@@ -29,6 +31,7 @@ def get_bands():
 # Get request to return the list of bands that are playing shows
 # Data to be returned is the band_id and show_id
 @bands.route("/playing", methods=["GET"])
+@error_handlers
 def get_bands_playing():
 
     playing_list = Playing.query.all()
@@ -43,7 +46,7 @@ def get_bands_playing():
 # returns a json object with the band information,
 # including associated shows they own/are playing
 @bands.route("/display/band/<int:band_id>", methods=["GET"])
-# @error_handlers
+@error_handlers
 @get_band_fromdb
 def get_single_band(**kwargs):
     
@@ -65,6 +68,8 @@ def genre_list_bands():
         band_list = Band.query.filter_by(genre= request.args.get("genre"))
     elif request.args.get("state"):
         band_list = Band.query.filter_by(state= request.args.get("state"))
+    else:
+        return jsonify({"message" : "Incorrect search parameters, please use genre or state"}), 400
 
     band_display = BandSchema(only=["band_name", "shows"], many=True)
 
@@ -76,8 +81,7 @@ def genre_list_bands():
 # method takes band fields to serialize into database
 # returns band fields as json object to confirm band creation
 @bands.route("/create", methods=["POST"])
-# @jwt_required()
-# @error_handlers
+@error_handlers
 @get_user_fromdb
 def band_creation(**kwargs):
 
@@ -108,7 +112,7 @@ def band_creation(**kwargs):
 # takes user fields band name, genre, state
 # returns json object of updated band
 @bands.route("/update/<int:band_id>", methods=["PUT"])
-# @error_handlers
+@error_handlers
 @get_user_fromdb
 @get_band_fromdb
 def update_band(**kwargs):
@@ -136,7 +140,7 @@ def update_band(**kwargs):
 # checks that user owns band before deletion
 # deletes band and returns message of band deleted
 @bands.route("/delete/<int:band_id>", methods=["DELETE"])
-# @error_handlers
+@error_handlers
 @get_user_fromdb
 @get_band_fromdb
 def delete_band(**kwargs):
