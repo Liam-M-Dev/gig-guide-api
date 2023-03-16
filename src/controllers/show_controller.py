@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from decorators.error_decorator import error_handlers
 from decorators.user_login import get_user_fromdb
+from decorators.show_decorator import get_show_fromdb
 from main import db
 from models.band import Band
 from models.show import Show
@@ -112,54 +113,41 @@ def show_creation(**kwargs):
 # venue identity is to authenticate and ensure venue is authorized to access show
 # fields are edited via input of dictionary data
 # returns updated show information as json object
-@shows.route("/update/show/venue/<int:venue_id>/<int:show_id>", methods=["PUT"])
-@jwt_required()
+@shows.route("/update/show/<int:show_id>", methods=["PUT"])
+@get_user_fromdb
+@get_show_fromdb
 @error_handlers
-def update_show_venue(venue_id, show_id):
-    venue = get_jwt_identity()
+def update_show(**kwargs):
+
+    user = kwargs["user"]
+
+    show = kwargs["show"]
+
     show_fields = show_schema.load(request.json)
-    
-    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
 
-    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
+    if request.args.get("venue"):
 
-    if venue.id != show.venue_id:
-        return abort(401, description="Sorry you do not have access to this show")
-    
-    show.show_name = show_fields["show_name"]
-    show.date = show_fields["date"]
-    show.band_id = show_fields["band_id"]
-    show.venue_id = venue.id
-    
+        venue = Venue.query.filter_by(id=request.args.get("venue")).first_or_404(description="Sorry this venue does not exist, please check id")
+        
+        if venue.user_id != user.id:
+            return jsonify({"message": "Sorry you do not have access to this venue to update a show"}), 401
 
-    db.session.commit()
+        if venue.id != show.venue_id:
+            return abort(401, description="Sorry you do not have access to this show")
+        
+        show.show_name = show_fields["show_name"]
+        show.date = show_fields["date"]
+        show.band_id = show_fields["band_id"]
+        show.venue_id = venue.id
+    elif request.args.get("band"):
+        band = Band.query.filter_by(id=request.args.get("band")).first_or_404(description="Sorry this band does not exist, please check id")
 
-    return jsonify(show_schema.dump(show))
-
-
-# Put method to allow bands to update show
-# method takes band identity and show identity
-# band identity is to authenticate and ensure band is authorized to access show
-# fields are edited via input of dictionary data
-# returns updated show information as json object
-@shows.route("/update/show/band/<int:band_id>/<int:show_id>", methods=["PUT"])
-@jwt_required()
-@error_handlers
-def update_show_band(band_id, show_id):
-    band = get_jwt_identity()
-    show_fields = show_schema.load(request.json)
-    
-    band = db.get_or_404(Band, band_id, description="Invalid band id, please check band id")
-
-    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
-
-    if band.id != show.band_id:
-        return abort(401, description="Sorry you do not have access to this show")
-    
-    show.show_name = show_fields["show_name"]
-    show.date = show_fields["date"]
-    show.band_id = band.id
-    show.venue_id = show_fields["venue_id"]
+        if band.user_id != user.id:
+            return jsonify({"message": "Sorry you do not have access to this band to update a show"}), 401
+        show.show_name = show_fields["show_name"]
+        show.date = show_fields["date"]
+        show.band_id = band.id
+        show.venue_id = show_fields["venue_id"]
     
 
     db.session.commit()
