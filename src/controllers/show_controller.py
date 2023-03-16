@@ -159,45 +159,30 @@ def update_show(**kwargs):
 # requires user id and venue id plus jwt authentication
 # checks that user owns venue before deletion or user is an admin
 # deletes venue and returns json format of message "venue deleted"
-@shows.route("/delete/show/venue/<int:venue_id>/<int:show_id>", methods=["DELETE"])
-@jwt_required()
+@shows.route("/delete/show/<int:show_id>", methods=["DELETE"])
+@get_user_fromdb
+@get_show_fromdb
 @error_handlers
-def delete_show_venue(venue_id, show_id):
+def delete_show_venue(**kwargs):
 
-    venue = get_jwt_identity()
-
-    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
-
-    venue = db.get_or_404(Venue, venue_id, description="Invalid venue id, please check venue id")
-
-    if venue.id != show.venue_id:
-        return abort(401, description="Sorry you do not have access to this show")
+    user = kwargs["user"]
+    show = kwargs["show"]
+    if request.args.get("venue"):
+        venue = Venue.query.filter_by(id=request.args.get("venue")).first_or_404(description="Sorry this venue does not exist, please check id")
+        if venue.user_id != user.id:
+            return jsonify({"message" : "Sorry you do not have access to this venue to delete the show"})
+        if venue.id != show.venue_id:
+            return jsonify({"message" : "Sorry venue does not have access to the show for deletion"}), 401
     
-    db.session.delete(show)
+        db.session.delete(show)
+    elif request.args.get("band"):
+        band = Band.query.filter_by(id=request.args.get("band")).first_or_404(description="Sorry band does not exist, check id")
+        if band.user_id != user.id:
+            return jsonify({"message" : "Sorry you do not have access to this band to delete the show"})
+        if band.id != show.band_id:
+            return jsonify({"message" : "Sorry band does not have access to show for deletion"}), 401
+        db.session.delete(show)
+    
     db.session.commit()
 
-    return jsonify({"msg": "show deleted"})
-
-
-# Delete route to allow a user to delete their venue
-# requires user id and venue id plus jwt authentication
-# checks that user owns venue before deletion or user is an admin
-# deletes venue and returns json format of message "venue deleted"
-@shows.route("/delete/show/band/<int:band_id>/<int:show_id>", methods=["DELETE"])
-@jwt_required()
-@error_handlers
-def delete_show_band(band_id, show_id):
-
-    band = get_jwt_identity()
-
-    show = db.get_or_404(Show, show_id, description="Show does not exist, please check id")
-
-    band = db.get_or_404(Band, band_id, description="Invalid venue id, please check band id")
-
-    if band.id != show.band_id:
-        return abort(401, description="Sorry you do not have access to this show")
-    
-    db.session.delete(show)
-    db.session.commit()
-
-    return jsonify({"msg": "show deleted"})
+    return jsonify({"msg": "show deleted"}), 200
