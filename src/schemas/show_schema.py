@@ -1,5 +1,9 @@
-from main import ma
-from marshmallow import fields
+try:
+    from main import ma
+    from marshmallow import fields
+except ImportError:
+    print("Error has occurred with imports"
+          "Please check importing from modules is correct")
 
 class ShowSchema(ma.Schema):
     class Meta:

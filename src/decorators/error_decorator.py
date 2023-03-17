@@ -1,7 +1,11 @@
-from functools import wraps
-from flask import jsonify
-from marshmallow.exceptions import ValidationError
-from sqlalchemy.exc import ProgrammingError, DataError
+try:
+    from functools import wraps
+    from flask import jsonify
+    from marshmallow.exceptions import ValidationError
+    from sqlalchemy.exc import ProgrammingError, DataError
+except ImportError:
+    print("Error has occurred with imports"
+          "Please check importing from modules is correct")
 
 # Error handler decorator to catch various errors within server and client
 def error_handlers(func):

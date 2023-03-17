@@ -1,5 +1,8 @@
-from main import db
-
+try:
+    from main import db
+except ImportError:
+    print("Error has occurred with imports"
+          "Please check importing from modules is correct")
 
 class Venue(db.Model):
     __tablename__ = "VENUES"
