@@ -20,14 +20,56 @@ My project is built to create a central location for bands and venues to post up
 
 ### R5) Document all endpoints for your API
 
+#### **_Before you start_**
+
+#### **Directory/Python setup**
+
+To be able to run this API on your computer follow these instructions for installation and set up, then there is a detailed list of all the API endpoints, their expected results and errors and methods that are used within the routes.  
+
+Installation requirements: You will need to ensure you have Python 3.10 and up and PostgreSQL installed on your device.  
+
+To begin with clone this repo and then create a virtual environment and activate the environment by running these commands in the src directory:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Once activated we have one more step with the python side of things to ensure everything is installed. Please run the install command with the requirements.txt file:
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install all the required third party dependencies/libraries that are needed to run this application.
+
+#### **PostgreSQL setup**
+
+To set up the database so that the flask API application can run smoothly you will need to do a couple things.  
+Firstly you need to create the database that this application will be connected too.  
+
+```SQL
+CREATE DATABASE gig_guide_api;
+```
+
+Once the database is created we need to assign a user to the database, to allow for the database URI to be connected, to do this we will make a user called "gig_dev" with a password of "music123" and give the gig_dev user all permissions on the database and all permissions to the public schema.
+
+```SQL
+CREATE ROLE gig_dev WITH PASSWORD 'music123';
+GRANT ALL PRIVILEGES ON DATABASE gig_guide_api TO gig_dev;
+GRANT ALL ON SCHEMA public TO gig_dev;
+```
+
+#### **Create, Seed and Drop the database**
+
 ***
 
 ### R6) ERD
 
 ![Entity Diagram Relationship](./docs/gig-guide-erd.png)
 
-For this entity relationship diagram provided I have defined four entities and one relationship table. The entities are users, bands, venues and shows and the relationship is between users and shows via the attending table. The user table has a relationship with bands and venues as a user is able to create a venue or a band and associate it with their user identity. The user also has a relationship with the shows entity via the attending table, this allows the user to register there attendance by supplying their users identity and the shows identity.  
-Bands and Venues have similar relationships with shows where they are able to create a show and either supply the band ID or the venue ID depending on who creates it.  
+For this entity relationship diagram provided I have defined four entities and two relationship table. The entities are users, bands, venues and shows and the relationship tables are attending and playing. The user table has a relationship with bands and venues as a user is able to create a venue or a band and associate it with their user identity. The user also has a relationship with the shows entity via the attending table, this allows the user to register there attendance by supplying their users identity and the shows identity.  
+Bands and Venues have similar relationships with shows where they are able to create a show and either supply the band ID or the venue ID depending on who creates it. To reduce duplication of data bands also have a many to many relationship that is associated in the playing table. This allows other bands to add themselves to the bill of a show without creating a similar entity within the shows table.  
 
 ***
 
@@ -51,6 +93,7 @@ The models for this project are:
 - Venue
 - Show
 - Attending
+- Playing
 
 #### **User**
 
@@ -72,6 +115,10 @@ A show model is where bands or venues are able to create a show that is upcoming
 
 Attending model is to represent the relationship between a user and shows. It is made up of a primary key for the attending_id, and 2 foreign keys the user_id and the show_id, which are both not nullable.  
 
+#### **Playing**
+
+Playing Model is to represent the relationship between shows and bands, whereas to allow bands to add themselves to the bill of an existing show. It is made up of a primary key and 2 foreign keys band_id and show_id, which are both nullable.
+
 ***
 
 ### R9) Discuss the database relations to be implemented in your application
@@ -82,6 +129,7 @@ The relations that are implemented are as follows:
 - Users have a one to many relationship with venues, as one user can own multiple venues. This is shown through the ERD by implementing a user_id as a foreign key inside the venue model that helps point a venue back to a user within the users table. In the real world often multiple venues can be owned by the same person and I was wanting to reflect that within my API.
 - Users also have a many to many relationship with shows, that is associated within the Attending table via foreign key within the model. You can see this represented in the ERD with the one to many line connecting users to the attending table. This reflects reality as a person is able to book themselves into multiple shows.  
 - Bands have a one to many relationship with the shows. this is represented through the ERD with the one to many connection and a band_id associated within the show model. This allows bands to create multiple shows however a band cannot create the same show at the same venue on the same date. This is reflected in the real world as bands tend to play multiple shows on a night or over a period of time, or they may play the same show at different venues.
+- Bands also have a many to many relationship with shows through the playing table, this is represented within the ERD with the many to many connection to the playing table. This allows multiple bands to sign onto the bill of a show and reduces data duplication within the shows table.
 - Venues have a one to many relationship with shows that is associated within the show table as a one to many line on the ERD. This points a show to a venue_id via a foreign key. In reality venues often have multiple shows on during the week and on the same night, to help differentiate the shows this allows a connection to which venue is hosting what gig and which bands will be playing that gig.
 - Shows has a many to many relationship with users that is associated within the attending table as well. You can see this represented within the ERD. The attending table allows many shows to be associated to many users through the foreign keys within the attending model.
 
@@ -102,7 +150,7 @@ Creating CLI commands is my next task to ensure that the connection between the 
 Once CLI commands are finalized within the app, I am going to create my initial setup of controllers. This is tracked via the controllers card, which has a checklist for each individual controller and for the init.py file. Within the init.py file I have a checklist to ensure each controller is added to the registerable controllers, and then implemented into the main app function. Each individual controller has a check list that ensures the blueprints are created and an initial get route to display the information for each table. This will be tracked with the use of Insomnia to ensure that the results are produced correctly. The due date for this is the 7th of March.
 
 The next task is to initialize the routing and implement all the functions and features that I am intending to have related to the databases.  
-To begin the process I have a card representing the routing for Users, With a checklist that ticks off the CRUD features, creating a user, reading users, updating users and deleting users, ensuring there is also appropriate authentication and validation and implementing searching functions to allow show the user what venues or bands are connected to their ID. Implementation plan of this is to have it done by the 8th.  
+To begin the process I have a card representing the routing for Users, With a checklist that ticks off the CRUD features, creating a user, reading users, updating users and deleting users, ensuring there is also appropriate authentication and validation and implementing searching functions to allow show the user what venues or bands are connected to their ID. Implementation plan of this is to have it done by the 8th (extended to 12th).  
 Routing for bands is the next one on the list and follows a similar line of checking the CRUD features, also creating search features to show bands with their upcoming shows, similar genres and states and displaying bands that have connected user IDs.  
 Routing for venues is the next card to check off that follows the same principals as before with CRUD features and displaying shows that are upcoming associated with the venue as well as displaying user ids that connect to the venues.  
 Routing for Shows again follows similar CRUD principals allowing a venue or band to create, update, read and delete upcoming shows. It also has features to display shows that are connected to one venue or shows that are connected to one band.  
