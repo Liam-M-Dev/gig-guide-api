@@ -2,8 +2,7 @@ try:
     from datetime import timedelta
 
     from flask import Blueprint, jsonify, request, abort
-    from flask_jwt_extended import create_access_token, \
-        get_jwt_identity, jwt_required
+    from flask_jwt_extended import create_access_token
 
     from decorators.error_decorator import error_handlers
     from decorators.user_login import get_admin_user, get_user_fromdb
@@ -114,7 +113,9 @@ def user_login():
 
     if not user or not bcrypt\
     .check_password_hash(user.password, user_fields["password"]):
-        return abort(401, "Incorrect password or email")
+        return jsonify({"message" : \
+                        "email or password didn't match"}),200
+        
     
     expiry = timedelta(days=1)
     access_token = create_access_token(identity=str(user.id),\
@@ -266,7 +267,7 @@ def register_attendance(**kwargs):
 @error_handlers
 def remove_attendance(**kwargs):
     """Removes attendance from database"""
-    
+
     user = kwargs["user"]
 
     attending = db.get_or_404(Attending, kwargs["attending_id"],\
