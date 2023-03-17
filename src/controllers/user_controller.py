@@ -39,7 +39,9 @@ def get_users(**kwargs):
     """
     users_list = User.query.all()
 
-    result = UserSchema(only=["id", "first_name", "last_name", "email"], many=True)
+    result = UserSchema(only=\
+                        ["id", "first_name", "last_name", "email"],\
+                              many=True)
 
     return jsonify(result.dump(users_list))
 
@@ -68,7 +70,8 @@ def display_user(**kwargs):
 
     if user.id != user_display.id:
         return jsonify({"message" : 
-                        "Sorry you do not have access to this user"})
+                        "Sorry you do not have access to this user"}),\
+                              401
 
     return jsonify(user_schema.dump(user_display))
 
@@ -91,10 +94,19 @@ def get_attendees():
 
 
 # Post method to allow users to login to the api
-# returns user details and JSON web token for authentication
+# route takes user email and password in json format, 
+# returns user email and jwt token for access to sites functionality
 @users.route("/login", methods=["POST"])
 @error_handlers
 def user_login():
+    """Return user email and JWT token
+
+    method queries user email and checks password is correct
+    returns error if incorrect or grants access and returns
+    JWT token and user email
+    """
+
+
     # collect schema to load user request into json object
     user_fields = user_schema.load(request.json)
 
@@ -105,9 +117,10 @@ def user_login():
         return abort(401, "Incorrect password or email")
     
     expiry = timedelta(days=1)
-    access_token = create_access_token(identity=str(user.id), expires_delta=expiry)
+    access_token = create_access_token(identity=str(user.id),\
+                                        expires_delta=expiry)
     
-    return jsonify({"user" : user.email, "token" : access_token})
+    return jsonify({"user" : user.email, "token" : access_token}), 200
 
 
 # Post method to register new user into database,
@@ -116,12 +129,19 @@ def user_login():
 @users.route("/register", methods=["POST"])
 @error_handlers
 def user_register():
-    
+    """Registers user in database
+
+    method requires fields to be filled out in json format
+    fields assign to user object 
+    serialize through schema and stored in database
+    returns user email and JWT access token
+    """
     user_fields = user_schema.load(request.json)
 
     # Filter user emails to confirm email is not already in use
     user = User.query.filter_by(email=user_fields["email"]).first()
-    # If email is in use, send error message to login or create new account
+    # If email is in use, 
+    # send error message to login or create new account
     if user:
         return abort(401, description="Email is already in use, \
                     please login with email or create a new account")
@@ -142,18 +162,25 @@ def user_register():
     
     
     expiry = timedelta(days=1)
-    access_token = create_access_token(identity=str(user.id), expires_delta=expiry)
+    access_token = create_access_token(identity=str(user.id),\
+                                        expires_delta=expiry)
     
-    return jsonify({"user" : user.email, "token" : access_token})
+    return jsonify({"user" : user.email, "token" : access_token}), 200
 
 
 # Route for updating users details
-# Takes ID of user and then user fields
-# returns updated data to the user in JSON format
+# method utilizes get_user_fromdb to return validated user object
+# Takes input via json format to assign updated details to user object
+# returns updated user object in JSON format
 @users.route("/update", methods=["PUT"])
 @error_handlers
 @get_user_fromdb
 def update_user(**kwargs):
+    """Updates user in database
+
+    method requires user details to be updated and validated in schema
+    return updated user object in JSON format
+    """
 
     user_fields = user_schema.load(request.json)
 
@@ -174,13 +201,17 @@ def update_user(**kwargs):
 
 
 # Route method to delete user from database
-# method requires user to submit their id, checking that id is authorized 
-# then deleting user and returning message informing user is deleted
+# method utilizes get_user_fromdb to return validated user object
+# takes route request as id to query user object from database
+# compares user id with authenticated user
+# returns error if id's do not match
+# otherwise user deletes from db 
+# returns json message and 200 code
 @users.route("/delete/<int:id>", methods=["DELETE"])
 @get_user_fromdb
 @error_handlers
 def delete_user(**kwargs):
-
+    """Deletes user from database"""
 
     user = kwargs["user"]
 
@@ -199,16 +230,19 @@ def delete_user(**kwargs):
 
 
 # Post method to allow users to attend an upcoming show
-# method takes user id to authenticate user
-# method takes the show_id as a field to validate through schema
-# returns json object of the upcoming show attendance
-@users.route("/attending/register/<int:id>", methods=["POST"])
-@jwt_required()
+# route utilizes get_user_fromdb to return validated user object
+# loads attending schema for serialization
+# creates Attending instance and takes input via JSON format 
+# to assign user id and show id to instance
+# stores attending instance in database
+# returns JSON format of attending instance
+@users.route("/attending/register", methods=["POST"])
+@get_user_fromdb
 @error_handlers
-def register_attendance(id):
-    user = get_jwt_identity()
+def register_attendance(**kwargs):
+    """Stores attending object in database"""
 
-    user = db.get_or_404(User, id, description="User not found")
+    user = kwargs["user"]
 
     attending_fields = attending_schema.load(request.json)
 
@@ -226,20 +260,24 @@ def register_attendance(id):
 # Delete method to allow users to remove attendance from a show
 # method takes user identity and attending id
 # removes attendance record and returns json message "attendance deleted"
-@users.route("/attending/remove/<int:id>/<int:attending_id>", methods=["DELETE"])
-@jwt_required()
+@users.route("/attending/remove/<int:attending_id>",\
+              methods=["DELETE"])
+@get_user_fromdb
 @error_handlers
-def remove_attendance(id, attending_id):
-    user = get_jwt_identity()
+def remove_attendance(**kwargs):
+    """Removes attendance from database"""
+    
+    user = kwargs["user"]
 
-    user = db.get_or_404(User, id, description="User not found")
-
-    attending = db.get_or_404(Attending, attending_id, description="record not found")
+    attending = db.get_or_404(Attending, kwargs["attending_id"],\
+                               description="record not found")
 
     if user.id != attending.user_id:
-        return {"message" : "Sorry you do not have access to this attendance"}, 401
+        return {"message" : \
+                 "Sorry you do not have access to this attendance"},\
+                      401
     
     db.session.delete(attending)
     db.session.commit()
 
-    return {"message" : "attendance removed"}, 200
+    return jsonify({"message" : "attendance removed"}), 200
