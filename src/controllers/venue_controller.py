@@ -1,5 +1,5 @@
 try:
-    from flask import Blueprint, jsonify, request, abort
+    from flask import Blueprint, jsonify, request
 
     from decorators.error_decorator import error_handlers
     from decorators.user_login import get_user_fromdb
@@ -113,7 +113,7 @@ def update_venue(**kwargs):
     
     method uses venue_fields to associate with venue attributes
     """
-    
+
     user = kwargs["user"]
     venue = kwargs["venue"]
 
