@@ -1,6 +1,10 @@
-from main import ma
-from marshmallow.validate import Length
-from marshmallow import fields
+try:
+    from main import ma
+    from marshmallow import fields
+    from marshmallow.validate import Length
+except ImportError:
+    print("Error has occurred with imports"
+          "Please check importing from modules is correct")
 
 class UserSchema(ma.Schema):
     class Meta:

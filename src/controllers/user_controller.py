@@ -1,28 +1,42 @@
-from flask import Blueprint, jsonify, request, abort
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from datetime import timedelta
-from decorators.error_decorator import error_handlers
-from decorators.user_login import get_admin_user, get_user_fromdb
-from main import db, bcrypt
-from models.user import User
-from models.attending import Attending
-from schemas.user_schema import user_schema, UserSchema
-from schemas.attending_schema import attending_schema, attending_schemas
+try:
+    from datetime import timedelta
 
+    from flask import Blueprint, jsonify, request, abort
+    from flask_jwt_extended import create_access_token, \
+        get_jwt_identity, jwt_required
 
+    from decorators.error_decorator import error_handlers
+    from decorators.user_login import get_admin_user, get_user_fromdb
+    from main import db, bcrypt
+    from models.attending import Attending
+    from models.user import User
+    from schemas.attending_schema import attending_schema, \
+        attending_schemas
+    from schemas.user_schema import user_schema, UserSchema
+except ImportError:
+    print("Error has occurred with imports"
+          "Please check importing from modules is correct")
+
+# Creates blueprint for user controller
 users = Blueprint("user", __name__, url_prefix="/users")
 
 
 # Get method for accessing all users
-# Initial user has to be admin to be allowed to view the list of users
-# method takes the id of the admin which is 1
-# method returns serialized information of users.
-# only id, first and last names, and email
+# Initial user has to be admin 
+# to be allowed to view the list of users
+# method uses get_admin_user decorator, to validate and 
+# return valid user object
+# Method returns all user objects in JSON format
 @users.route("/display_users", methods=["GET"])
 @error_handlers
 @get_admin_user
 def get_users(**kwargs):
-
+    """Return users from database
+    
+    Uses get_admin_decorator to return valid admin user
+    Queries users from database and serialize information 
+    into json format
+    """
     users_list = User.query.all()
 
     result = UserSchema(only=["id", "first_name", "last_name", "email"], many=True)
@@ -30,29 +44,44 @@ def get_users(**kwargs):
     return jsonify(result.dump(users_list))
 
 
-# Get method for displaying single user, including bands and venues they own
-# Function takes user Id to and authenticates through JWT to ensure 
-# user is authorized/authenticated.
-# returns user information within json object
+# Get method for displaying single user, 
+# including bands and venues they own
+# route utilizes get_user_from db to return validated user object
+# Queries user for display from route request
+# returns user object serialized into json format
 @users.route("/display_user/<int:user_id>", methods=["GET"])
 @error_handlers
 @get_user_fromdb
 def display_user(**kwargs):
+    """Return user information in json format
+    
+    Method utilizes get_user_fromdb
+    queries user in database, checks if user id's match
+    return serialized data, or error message and code
+    """
 
     user = kwargs["user"]
 
-    user_display = db.get_or_404(User, kwargs["user_id"], description="User not found, please check id")
+    user_display = db.get_or_404(User, kwargs["user_id"],\
+                                  description=\
+                                    "User not found, please check id")
 
     if user.id != user_display.id:
-        return abort(401, description="Sorry you do not have access to this user")
+        return jsonify({"message" : 
+                        "Sorry you do not have access to this user"})
 
     return jsonify(user_schema.dump(user_display))
 
 
 # Get method for displaying contents of attending table
+# Route queries attending objects from database
+# serializes through schema and returns json format of 
+# attending table contents
 @users.route("/attending/show", methods=["GET"])
 @error_handlers
 def get_attendees():
+    """Return Attending objects from database"""
+
 
     attendees_list = Attending.query.all()
 
