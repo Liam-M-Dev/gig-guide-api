@@ -50,7 +50,7 @@ def get_users(**kwargs):
 # route utilizes get_user_from db to return validated user object
 # Queries user for display from route request
 # returns user object serialized into json format
-@users.route("/display_user/<int:user_id>", methods=["GET"])
+@users.route("/display/user/<int:user_id>", methods=["GET"])
 @error_handlers
 @get_user_fromdb
 def display_user(**kwargs):
@@ -114,7 +114,7 @@ def user_login():
     if not user or not bcrypt\
     .check_password_hash(user.password, user_fields["password"]):
         return jsonify({"message" : \
-                        "email or password didn't match"}),200
+                        "email or password didn't match"}),401
         
     
     expiry = timedelta(days=1)
@@ -144,8 +144,8 @@ def user_register():
     # If email is in use, 
     # send error message to login or create new account
     if user:
-        return abort(401, description="Email is already in use, \
-                    please login with email or create a new account")
+        return jsonify({"message": \
+                        "Email is already in use"}), 401
     
     user = User()
 
@@ -218,8 +218,9 @@ def delete_user(**kwargs):
 
     id = kwargs["id"]
 
-    if user.id != id:
-        return abort(401, description="Invalid User, please check ID")
+    if user.id != id and not user.admin:
+        return jsonify({"message" : \
+                        "No access to this user"}), 401
     elif user.admin and not user:
         db.session.delete(user)
         db.session.commit()
@@ -274,8 +275,8 @@ def remove_attendance(**kwargs):
                                description="record not found")
 
     if user.id != attending.user_id:
-        return {"message" : \
-                 "Sorry you do not have access to this attendance"},\
+        return jsonify({"message" : \
+                 "Sorry you do not have access to this attendance"}),\
                       401
     
     db.session.delete(attending)

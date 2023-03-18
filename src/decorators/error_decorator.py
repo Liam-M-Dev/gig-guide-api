@@ -21,6 +21,8 @@ def error_handlers(func):
             return jsonify({"message" : "TypeError within the server"}), 500
         except DataError:
             return jsonify({"message" : "Error with the data you are inputting"}), 400
+        except KeyError:
+            return jsonify({"message": "Missing body for request"}), 500
         return response
     return wrapper
 

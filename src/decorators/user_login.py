@@ -29,9 +29,9 @@ def get_admin_user(func):
                                 please check the token")
 
         if not user.admin:
-            return jsonify({"message" : "Error has occurred, \
-                            please ensure you are \
-                            logging in as the admin"}), 401
+            return jsonify({"message" : "Error has occurred," \
+                            " please ensure you are" \
+                            " logging in as the admin"}), 401
         kwargs["user"] = user
 
         return func(*args, **kwargs)
@@ -52,8 +52,8 @@ def get_user_fromdb(func):
         user = User.query\
             .filter_by(id=get_jwt_identity())\
                 .first_or_404(description=\
-                              "Error in retrieving user, \
-                                please check the token")
+                              "Error in retrieving user," \
+                                "please check the token")
 
         
         kwargs["user"] = user

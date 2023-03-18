@@ -193,7 +193,7 @@ def delete_band(**kwargs):
         return jsonify({"message" : \
                         "Sorry you do not have access to this band"}),\
                         401
-    elif user.admin and not user.id != band.user_id:
+    elif user.admin and user.id != band.user_id:
         db.session.delete(band)
         db.session.commit()
     else:

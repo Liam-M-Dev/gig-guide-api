@@ -48,19 +48,21 @@ def display_venue(id):
     queries shows using venue.id
     serializes venue and show objects through schemas
     """
-    venue = db.get_or_404(Venue, \
-                          id, \
-                          description=\
-                            "Invalid venue id, please check ID")
+    venue = Venue.query.filter_by(id=id).first()
+
+    if not venue:
+        return jsonify({"message" : \
+                        "Sorry venue does not exist"}), 400
 
     venue_display = VenueSchema(only=["id", "venue_name", "location"])
 
-    upcoming_shows = db.get_or_404(Show, \
-                                   venue.id, \
-                                    description=\
-                                        "There are no upcoming shows")
+    upcoming_shows = Show.query\
+        .filter_by(venue_id = venue.id)
+    
+    if not upcoming_shows:
+        upcoming_shows = []
 
-    show_display = ShowSchema(only=["show_name", "date"])
+    show_display = ShowSchema(only=["show_name", "date"], many=True)
 
     return jsonify(venue_display.dump(venue), \
                    show_display.dump(upcoming_shows))
