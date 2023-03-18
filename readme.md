@@ -62,6 +62,303 @@ GRANT ALL ON SCHEMA public TO gig_dev;
 
 #### **Create, Seed and Drop the database**
 
+Once everything is setup and installed we can start the API by creating the database, seeding it with seeds and dropping the database to ensure we can clear the data. Then we can recreate the database and seed it to start using the API's functionalities/features.  
+The commands to run this are:  
+
+```python
+flask db create
+flask db seed
+flask db drop
+```
+
+This will create, seed and drop the database. Ensuring that everything is working this is the final set up of the API. Next we re-run ```flask db create and flask db seed```, then finally to create the app and start it up type ```flask run``` in the command terminal.
+
+#### **API end points documentation**
+
+_To work with this api you will need to be either using postman or insomnia, for the examples shown it will be via insomnia._
+
+_Before jumping into the full functionality of this API, it is recommended to login with a few of the seeded users to make it easier to navigate when authentication is required. Here you can save the tokens somewhere so that you can re-use them whilst exploring the API._
+
+#### **User_controller endpoints**
+
+#### user login endpoint
+
+#### route = localhost:5000/users/login **"POST"**
+
+This route allows users to login to the API and returns a unique JWT access token that has an expiry for 1 day. This is used to then do further authentication and querying Users from the database table "USERS". The route takes input through postman or Insomnia in the the data form of JSON. Requires a user_email and user_password. Requests are to be made like this
+
+```JSON
+{
+    "user.email" : "example.email.com",
+    "user.password" : "example.password",
+}
+```
+
+A successful response will look like this
+
+![Successful user_login](./docs/api_endpoints/user_login.png)
+
+If the email or password is incorrect the response will be
+
+![Unsuccessful user_login](./docs/api_endpoints/failed_login.png)
+
+#### users endpoint
+
+#### route = localhost:5000/users/  **"GET"**
+
+the users endpoint allows the admin user to receive a list of JSON objects that contain each user that is stored in the database. It requires the user to put their JWT token into the bearer auth token. This will either confim if the user is an admin or not. 
+
+A successful response will return
+
+![successful display users](./docs/api_endpoints/display_users.png)
+
+An unsuccessful response will return
+
+![unsuccessful display users](./docs/api_endpoints/display_users_fail.png)
+
+#### display single user endpoint
+
+#### route: localhost:5000/users/display/user **"GET"**
+
+Display user endpoint allows a user to view their user information that is stored in the database. This information is returned back in a JSON object format that includes the users first and last name in string format, their user Id as an Integer, their email as a string, a boolean telling them if they are an admin or not, a hashed password and any nested attending shows via their relationship with shows through the attending table. This input requires the JWT token a user is assigned upon registration or login and the users ID in the route header, if the incorrect id is given an error will occur.  
+
+A successful response will return
+
+![successful display user](./docs/api_endpoints/display_user.png)
+
+An unsuccessful response will return
+
+![unsuccessful display user](./docs/api_endpoints/failed_display_user.png)
+
+#### Users attending show
+
+#### route = localhost:5000/users/attending/show  **"GET"**
+
+Attending show endpoint allows users to see who is attending what upcoming shows. get request method queries attending objects within the attending table and returns attending instances as JSON object format in a list. Displays the user id, show id and the id of the attending object.  
+
+![successful request](./docs/api_endpoints/attending_display.png)
+
+#### User registration endpoint
+
+#### route = localhost:5000/users/register  **"POST"**
+
+Register route for users allows a user to essentially create an account. The route will handle creating a new user object and saving it within the database. The user will need to fill out the required fields win the response body in a JSON object format. This will need a first and last name, a user email, a password of 8 characters in length and will automatically input the user as not an admin.  
+
+A successful input and response is
+
+![successful user register](./docs/api_endpoints/successful_register.png)
+
+If the email is already in use a response like this will be made
+
+![unsuccessful user register](./docs/api_endpoints/failed_register.png)
+
+#### Attending register endpoint
+
+#### route = localhost:5000/users/attending/register **"POST"**
+
+Attending register route allows a user to register their attendance to an upcoming show. This is done by inputting the users JWT to authenticate and return the valid user object. The user then puts in the request body in JSON object format the show_id that they wish to attend. Returns the newly created attending object, which consists of a unique id, the band id and show id.
+
+![attending registration](./docs/api_endpoints/attending_show.png)
+
+#### Update user endpoint
+
+#### route = localhost:5000/users/update **"PUT"**
+
+Update route allows a user to update there user details that are stored within the users table. To access this the user will need an authenticated JWT token which will query the user object and return this back to the route function. The user can update their details within the body of the request in JSON object format. The updated details will the replace the old details in the user object, commit this to the database and return the updated users details for viewing.
+
+![update user details](./docs/api_endpoints/update_details.png)
+
+#### Delete user endpoint
+
+#### route = localhost:5000/users/delete **"DELETE"**
+
+Delete endpoint allows a user to remove their details from the database. This can also be done by an admin user. Route takes the user id integer to query user object from database and checks that the user id matches with the user id that is currently logged in. If there is not a match an error will be thrown with 401 code, otherwise the user will be deleted from the database.
+
+![Delete user from db](./docs/api_endpoints/user_deleted.png)
+
+![Failed delete user](./docs/api_endpoints/failed_user_delete.png)
+
+#### Remove attendance endpoint
+
+#### route = localhost:5000/users/attending/remove/int:attending_id  **"POST"**
+
+Remove attendance allows the user to remove there attendance from an upcoming show. This is done by taking the users JWT token and authenticating the user, then taking an integer from the routes header to match the attending_id. It will get an error if there is no exisiting attendance record or if the users_id does not match the attendance records user_id.
+
+![Remove from attending](./docs/api_endpoints/attendance_removal.png)
+
+#### **Band Endpoints**
+
+#### Bands endpoint
+
+#### route = localhost:5000/bands/  **"GET"**
+
+Displays a list of all the band objects within the bands table. Returns a JSON object format and requires no input apart from sending the initial bands route request. Also display's nested relationships with shows and playing, this is so that users can see what upcoming shows the band has created or are playing in.
+
+![display band list](./docs/api_endpoints/display_bands.png)
+
+#### Display single band endpoint
+
+#### route = localhost:5000/bands/display/band/int:band_id **"POST"**
+
+Route uses band id integer to query band object from database table bands. Returns 404 error if no band is found. If the band does exist, band object is validated and serialized through the schema and displayed in JSON object format. Upcoming shows that band created and are playing are nested within schema.
+
+![single band display](./docs/api_endpoints/single_band.png)
+
+#### Display search bands endpoint
+
+#### route = localhost:5000/bands/search **"GET"**
+
+Route uses queries within the routes headers to search for bands with similar genres or similar states. returning an error if the request goes beyond the parameters. Returned responses are of the queried band objects in JSON object format.  
+Band objects contain the bands name, genre, state all as strings, also includes the bands unique ID number as an integer. Nested shows with the show name and id are also displayed.
+
+![display bands with similar genre](./docs/api_endpoints/band_search_genre.png)
+
+![display bands with similar state](./docs/api_endpoints/band_search_state.png)
+
+#### Playing endpoint
+
+#### route = localhost:5000/bands/playing **"GET"**
+
+Simple get request to display a list of all the playing objects within the playing table. The playing objects consist of a unique id, a band id and a show id all integers. This helps represent the many to many relationship with shows and bands.
+
+![Playing display list](./docs/api_endpoints/playing_display.png)
+
+#### Band creation endpoint
+
+#### route = localhost:5000/bands/create  **"POST"**
+
+Band creation takes the users JWT access token to authenticate and return validated user from database. User will input in the body of the request in JSON format the bands_fields, which associates the fields with attributes of the schema and model and allows for validation. This will also check if the band name exists within the system. When all checks pass, the band is added into the database table bands and returns the newly created band with all of its attributes in JSON object format.  
+
+![Band creation](./docs/api_endpoints/band_creation.png)
+
+#### Band update endpoint
+
+#### route = localhost:5000/bands/update/int:band_id **"PUT"**
+
+The update route allows a band to update its details. This is done by getting the user from the users JWT access token, and the band from the database by querying the band_id through the band objects in bands. The function then checks if both the user object and band object have matching user_ids. Returning and error if there is not a match. If there is a match then the band updates its fields by taking input from the request body which includes the band name, genre and state. The function then commits the band to the database and returns the updated band information as a JSON object to view.
+
+![Updated band](./docs/api_endpoints/band_updates.png)
+
+#### Band deletion endpoint
+
+#### route = localhost:5000/bands/delete/int:band_id  **"DELETE"**
+
+This endpoint allows a user to remove a band that they are associated with from the bands table within the database. It requires the JWT access token to authenticate and return the validated user object. The bands id which is used to query the band within the database and return a validated band object. The user Id and band user_id are then checked to ensure user has access to the band, the only overriding possibility is if the user is an admin. Band is then removed from the database and a message is returned with the message code 200
+
+![Deleted band from database](./docs/api_endpoints/band_deletion.png)
+
+#### Register band to show via playing endpoint
+
+#### route = localhost:5000/bands/playing/register/int:band_id **"POST"**
+
+Playing register endpoint allows bands to sign themselves up onto an upcoming show. This stores the information of band+id and show_id in a row within the playing table. Returning the playing object back to the viewer with the information stored as a JSON object.
+
+![playing registration](./docs/api_endpoints/playing_registration.png)
+
+#### Remove band from show via playing endpoint
+
+#### route = localhost:5000/bands/int:band_id/int:playing_id **"DELETE"**
+
+Remove endpoint that allows a band to remove itself from the bill of an upcoming show. This is handled by getting the user id from a JWT token to check authorization of band. the band object and playing object are queried through the inputted integers in the route header, and are checked to see if playing.band_id is the same and the band_id. Returning and error if they are not. If they are a match then playing object is removed from playing table and message is returned with 200 code.
+
+![Remove playing from table](./docs/api_endpoints/playing_removed.png)
+
+#### **Venue Endpoints**
+
+#### Venue list display
+
+#### route = localhost:5000/venues  **"GET"**
+
+venues endpoint that allows the viewing of the list of venues that are stored within the database. Venue information is the venue name, the venue location as strings, also features the nested user that owns the venue with their first and last name as strings. List is returned as a JSON objects.  
+
+![venue list display](./docs/api_endpoints/venue_list.png)
+
+#### Venue single display endpoint
+
+#### route = localhost:5000/venues/display/venue/int:venue_id
+
+Venue single display route allows the user to view a single venue and the upcoming shows that are associated with that venue id. Using an integer submitted by the user within the header, the function queries the venue object that has that id number as its primary key and stores the venue object into a variable. using the venue's id number the function also queries any upcoming shows and stores them within another variable. Using schemas the venue and show are then serialized into displayable JSON objects and returned to the user.
+
+![Display single venue](./docs/api_endpoints/venue_single.png)
+
+#### Venue register endpoint
+
+#### route = localhost:5000/venues/register  **"POST"**
+
+Venue register allows a user to create a venue that they own or work for. This is done by getting the authenticated user from their JWT token. Taking the request body in JSON object format, the method processes the venues details, which is the name of the venue in a string format, the location of the venue also in a string format and assigns it a unique primary key in integer format. The object is then serialized and stored into the venues table and also returned completed for the user to view
+
+![register venue](./docs/api_endpoints/venue_register.png)
+
+#### Venue update endpoint
+
+#### route = localhost:5000/venues/update/int:venue_id  **"PUT"**
+
+Venue update endpoint allows a venue to update its venue name and venue location with new information. Takes the JWT access token of a user to verify the user has access to the venue. Then using venue ID queries the venue object from the table of venues. Using the request body and as JSON data, the venue name and location can then be changed. Errors will be thrown if the user does not have access or if the data is missing fields that need to be associated with the models attributes.  
+
+![Venue Update](./docs/api_endpoints/venue_update.png)
+
+#### Venue delete endpoint
+
+#### route = localhost:5000/venues/delete/int:venue_id  **"DELETE"**
+
+Venue delete route allows a venue to be removed from the venues table within the database. Function gets passed the user object from a submitted JWT token and queries the venue using the venue_id within the request header. Function checks if the user has access to the venue to allow it to be removed. Throws an error if the user does not have access along with the error code 401, only way to override this is if the user is an admin user. If the checks clear then the function removes the venue from the database and returns a venue deleted message with 200 code.
+
+![Venue deleted](./docs/api_endpoints/venue_deleted.png)
+
+#### **Show Endpoints**
+
+#### Shows display endpoint
+
+#### route = localhost:5000/shows/  **"GET"**
+
+Simple method to return a full list of the upcoming shows from within the shows table in the database. function queries all of the show objects that are stored within the shows table, runs them through the schema for serialization and validation and returns list of show objects as JSON object format for the viewer.
+
+![display shows](./docs/api_endpoints/shows_display.png)
+
+#### Show display endpoint
+
+#### route = localhost:5000/shows/display/show  **"GET"**
+
+Show display route allows for a single show to be displayed with the venue it is associated with along with the venues location. The Show is queried through the shows table using a primary key that is received from the routes header. If the show does not exist an error is thrown and a message plus the error code 400 is sent back to the user. The venue is queried by using the show's venue_id attribute. If no venue object is found within the venues table, an error is thrown with a message and a error code 400. If both objects are succesfully queried then the show and venue are run through their schemas for validation and serialization, and returned to the user as JSON objects.
+
+![display single show and venue](./docs/api_endpoints/show_display.png)
+
+#### Shows search endpoint
+
+#### route = localhost:5000/shows/display/search  **"GET"**
+
+Search endpoint for shows to allow a user to search between shows that are at the same venue or to search for shows created by a certain band. The method uses the query requests from the route to allow a user to select either band and the bands id or venue and the venue id. If something incorrectly chosen an error will be thrown to let the user know to search between bands and venues only. Show objects are then queried by either matching shows with band id or venue ids to the request id. Once shows are queried the objects are serialized and displayed as JSON objects only displaying the show name and date.
+
+![display venue search](./docs/api_endpoints/show_venue_search.png)
+![display band search](./docs/api_endpoints/show_band_search.png)
+
+#### show creation
+
+#### route = localhost:5000/shows/create/show  **"POST"**
+
+Show creation route allows venues and bands to create an upcoming show and store it within the shows table. To do this a request needs to be made to query either if a band or a venue is making this show along with their associated id. A user JWT token is needed to be sent in the authorization header to confirm that band or venue making the request is coming from the authorized user. Using the show_fields a venue or band is then able to put the show name, show date, and venue/band id in the request body. It only needs one the id of the band if a venue is creating the show or the id of a venue if the band is creating the show. Data is then serialized through the show schema, and stored within the database table shows. A returned JSON object of the shows data is sent back to the user
+
+![display venue show creation](./docs/api_endpoints/shows_venue_creation.png)
+![display band show creation](./docs/api_endpoints/shows_band_creation.png)
+
+#### Show update endpoint
+
+#### route = localhost:5000/shows/update/show/int:show_id  **"PUT"**
+
+Update endpoint allows the band or venue to update a shows information such as needing to change the date or the show name. To do this the user is grabbed from a JWT to ensure the band or venue is being used by an authorized user. Inside the request queries either a venue or band with its id, similar to how a show creation is made, this helps dictate either a band or a venue is updating the show and ensure band or venue have access to the show. The same process with a body in the request that has JSON data as the format and fills in the show_fields to the newly updated information. This then serializes the updated show and commits it back to the database and returns an updated form of the show to the user as a JSON object.
+
+![show band update](./docs/api_endpoints/show_band_update.png)
+![show venue update](./docs/api_endpoints/show_venue_update.png)
+
+#### Show delete endpoint
+
+#### route = localhost:5000/shows/delete/show/int:show_id  **"DELETE"**
+
+Show delete route allows a band or venue to remove the show from the shows table. The method utilizes the same search request to query a venue or band object from the users choice, whilst also gathering the users JWT token to ensure that the band or venue is authorized to delete the show. A show is queried from the request header using int:show_id the show id is then checked with either the band or venue id depending on which one is executing the delete process of the show. If any of the checks do not pass an error will be thrown with a 401 code. If all checks pass then the show is deleted from the shows table and a message is returned with a 200 code.  
+
+![show delete band](./docs/api_endpoints/show_band_delete.png)
+![show delete venue](./docs/api_endpoints/show_venue_delete.png)
+
 ***
 
 ### R6) ERD
