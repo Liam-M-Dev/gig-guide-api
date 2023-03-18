@@ -50,13 +50,18 @@ def display_show(id):
     """
 
 
-    show = db.get_or_404(Show, id, description=\
-                         "Sorry no shows found with this id")
-    venue = db.get_or_404(Venue, show.venue_id, description=\
-                          "Venue does not exist for this show")
+    show = Show.query.filter_by(id=id).first()
+    if not show:
+        return jsonify({"message" : \
+                        "Show does not exist"}), 400
+    venue = Venue.query.filter_by(id=show.venue_id).first()
+    if not venue:
+        return jsonify({"message" : \
+                        "Venue is not connected to show"}), 400
 
 
-    show_display = ShowSchema(only=["id", "show_name", "date"])
+    show_display = ShowSchema(only=\
+                              ["id", "show_name", "date", "band_id"])
     venue_display = VenueSchema(only=["venue_name", "location"])
 
     return jsonify(show_display.dump(show), venue_display.dump(venue))

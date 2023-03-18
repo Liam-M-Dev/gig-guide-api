@@ -158,7 +158,7 @@ def delete_venue(**kwargs):
         return jsonify({"message" : \
                         "You do not have access to this venue"}), \
                             401
-    elif user.admin and not user.id != venue.user_id:
+    elif user.admin and user.id != venue.user_id:
         db.session.delete(venue)
         db.session.commit()
     else:
