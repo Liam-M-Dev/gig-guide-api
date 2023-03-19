@@ -386,7 +386,7 @@ Show delete route allows a band or venue to remove the show from the shows table
 
 ### R6) ERD
 
-![Entity Diagram Relationship](./docs/gig-guide-erd-final.png)
+![Entity Diagram Relationship](docs/gig-guide-erd-final.png)
 
 For this entity relationship diagram provided I have defined four entities and two relationship table. The entities are users, bands, venues and shows and the relationship tables are attending and playing. The user table has a relationship with bands and venues as a user is able to create a venue or a band and associate it with their user identity. The user also has a relationship with the shows entity via the attending table, this allows the user to register there attendance by supplying their users identity and the shows identity.  
 Bands and Venues have similar relationships with shows where they are able to create a show and either supply the band ID or the venue ID depending on who creates it. To reduce duplication of data bands also have a many to many relationship that is associated in the playing table. This allows other bands to add themselves to the bill of a show without creating a similar entity within the shows table.  
@@ -417,7 +417,7 @@ The models for this project are:
 
 #### **User**
 
-The User model is the first point of call for this application, as it allows our users to create their own account, create a venue or band account and attend upcoming shows. In the User Model we have 4 attributes and 1 primary key. The primary key is the user_id and is serialized by our database postgresql. For the attributes a user has a first name, last name, email and password, all of these elements are not nullable. The password will also be protected by using password hashing via Bcrypt.  
+The User model is the first point of call for this application, as it allows our users to create their own account, create a venue or band account and attend upcoming shows. In the User Model we have 5 attributes and 1 primary key. The primary key is the user_id and is serialized by our database postgresql. For the attributes a user has a first name, last name, email, password, and admin all of these elements are not nullable. The password will also be protected by using password hashing via Bcrypt. Admin is a boolean that is default set to False, The admin attribute helps to define if a user is an admin and grants the user some extra abilities such as removing a profile not linked to themselves.
 
 #### **Band**
 
