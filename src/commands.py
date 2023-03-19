@@ -7,6 +7,7 @@ try:
     from models.show import Show
     from models.venue import Venue
     from models.user import User
+    from sqlalchemy.exc import OperationalError
 except ImportError:
     print("Error has occurred with imports"
           "Please check importing from modules is correct")
@@ -17,8 +18,11 @@ db_commands = Blueprint("db", __name__)
 # db function to create the database
 @db_commands .cli.command("create")
 def create_db():
-    db.create_all()
-    print("Tables Created")
+    try:
+        db.create_all()
+        print("Tables Created")
+    except OperationalError:
+        print("please check that server is on and connected")
 
 # db function to seed database with seeds
 @db_commands .cli.command("seed")
@@ -232,8 +236,13 @@ def seed_db():
     except NameError:
         print("Error with variable names,"
                "please check the names are correct in code")
+    except OperationalError:
+        print("please check that server is on and connected")
 
 @db_commands .cli.command("drop")
 def drop_db():
-    db.drop_all()
-    print("Tables Dropped")
+    try:
+        db.drop_all()
+        print("Tables Dropped")
+    except OperationalError:
+        print("please check that server is on and connected")
