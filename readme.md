@@ -1,6 +1,8 @@
-# API Webserver Project
+# API Web Server Project
 
 ## Liam Massey - T2A2
+
+### [github repo](https://github.com/Liam-M-Dev/gig-guide-api)
 
 ***
 
@@ -12,9 +14,30 @@ My project is built to create a central location for bands and venues to post up
 
 ### R3) Why have you chosen this database system. What are the drawbacks compared to others?
 
+The database system that I have chosen to use for this project is PostgreSQL. The reason for this decision is because it is a highly advanced open sourced relational database management system. This is beneficial because it has a lot of community support, documentation and continual updates/quality of life improvements. It is also used by some of the bigger companies in the tech industry which gives you confidence in its ability to handle data and relational database management(Panchenko, I. 2021)(1).  
+Postgres also offers a pretty robust collection of data types and keeps data integrity viable with the use of constraints and primary/foreign keys. Another reason for the decision of postgres is its performance and security with data and transactions, giving the database some solid methods of keeping data secure, allowing hashed passwords and protecting data from middle man attacks. Whilst also being able to handle multiple transactions at the same time. It also has a solid ability to handle different programming languages making it a versatile database management system(Chiessi, L. 2018)(2).
+
+There are some disadvantages/drawbacks to using postgresql as opposed to some other database systems. For instance postgres has a slower performance than other systems. This can be seen with the querying of results as the system will read through an entire table to be able to locate the relevant data. Obviously this can become an issue when data sets tend to scale up in size. Being open sourced can be an advantage and a disadvantage at the same time, because its open sourced this can result in it having trouble in having its name out in the general forum and doesn't come with liability/warranty protection. This can also result in less skilled people being around that can work on this system.  
+Another disadvantage is that the data is not necessarily all that flexible. What I mean by this is that if we have some data and we want to add a new field to this collection. We have to apply this information into each existing data row even if we don't have information to store into pre-existing instances for the new field(Dhruv, S. 2019)(3).
+
 ***
 
 ### R4) Identify and discuss the key functionalities and benefits of an ORM  
+
+Using Object Relational Mapping gives us access to some core functionalities that benefit the development and usage of an API.  
+
+- Data Persistency: ORM's allow a way of to persist data to a database without the need of writing SQL code manually. This helps to abstract away the details of database operations and simplify the ways to interact with a database.
+- Querying: ORM's provides a solid way to query a database with the ability to implement high level relational orientated syntax. This provides a simpler and more refined way of querying data through the databases without the need of writing your own SQL queries.
+- Relationships: Relationships are a key functionality of ORM's as it helps to define and manage relationships between the objects within an application and tables in the database. This gives developers a way to define and associate relationships such as one to one, one to many and many to many.
+- Mapping: ORM's are able to map the data in databases in the forms of objects within the application. this gives the developer more freedom to write effective functions and methods that interact with the database, rather than relying on writing SQL statements.
+- Validation: With the use of things like schemas, ORM's give us a way to validate the data before adding it within the database. This frees up a lot of time and effort, and provides a way to ensure that the data is correct, consistent and meets the criteria before being added to the database(Pedamkar, P. 2022)(4).
+
+Additionally some of the key benefits of using an ORM are
+
+- Simplifies the database access by providing an abstraction layer between the database and the application. Allowing the interaction with the database through object orientated syntax giving it a more robust and intuitive access.
+- ORM's give developers independence from the database. This saves a lot of time and gives the developer options when/if the database system needs to be changed/switched. Not having the language tied to one system gives database flexibility.
+- ORM's provide a level of consistency by having standardized ways of accessing, updating, deleting and creating data. This helps to reduce errors and inconsistencies that can appear when using SQL statements.
+- Productivity is increased with the usage of ORMs by reducing the amount of boilerplate code needed to be written to interact with the database. Giving developers more time to focus on the applications logic rather than implementation(Zelinsky, A. 2022)(5)(Makai, M. 2022)(6).
 
 ***
 
@@ -106,7 +129,7 @@ If the email or password is incorrect the response will be
 
 #### route = localhost:5000/users/  **"GET"**
 
-the users endpoint allows the admin user to receive a list of JSON objects that contain each user that is stored in the database. It requires the user to put their JWT token into the bearer auth token. This will either confim if the user is an admin or not. 
+the users endpoint allows the admin user to receive a list of JSON objects that contain each user that is stored in the database. It requires the user to put their JWT token into the bearer auth token. This will either confirm if the user is an admin or not.  
 
 A successful response will return
 
@@ -363,7 +386,7 @@ Show delete route allows a band or venue to remove the show from the shows table
 
 ### R6) ERD
 
-![Entity Diagram Relationship](./docs/gig-guide-erd.png)
+![Entity Diagram Relationship](./docs/gig-guide-erd-final.png)
 
 For this entity relationship diagram provided I have defined four entities and two relationship table. The entities are users, bands, venues and shows and the relationship tables are attending and playing. The user table has a relationship with bands and venues as a user is able to create a venue or a band and associate it with their user identity. The user also has a relationship with the shows entity via the attending table, this allows the user to register there attendance by supplying their users identity and the shows identity.  
 Bands and Venues have similar relationships with shows where they are able to create a show and either supply the band ID or the venue ID depending on who creates it. To reduce duplication of data bands also have a many to many relationship that is associated in the playing table. This allows other bands to add themselves to the bill of a show without creating a similar entity within the shows table.  
@@ -372,12 +395,12 @@ Bands and Venues have similar relationships with shows where they are able to cr
 
 ### R7) Detail any third party services that your app will use
 
-- Flask
-- flask-sqlalchemy + SQLAlchemy
-- flask-marshmallow + Marshmallow
-- flask-bcrypt
-- flask-jwt-extender
-- Insomnia/postman
+- Flask: Flask is a lightweight web framework(often described as a micro framework), which allows developers to build effective web applications and API's. Flask provides only the essential components for web development and is highly customizable. Flask is modular, lightweight, has multiple flask-extensions, solid documentation, provides an inbuilt routing system and is RESTful API supported(flask documentation. 2022)(7).
+- flask-sqlalchemy + SQLAlchemy: Flask-sqlalchemy is a library that provides integration between the flask app and the SQLalchemy object-relational mapper. This is a popular library that allows developers to implement code that interacts with the database through python. It features data abstraction, simplified database access, integration with flask and flask-extensions, flexible and provides great performance(flask-sqlalchemy documentation. 2022)(8).
+- flask-marshmallow + Marshmallow: Flask-Marshmallow provides integration between a flask app and the Marshmallow library. This is a popular way to serialize and deserialize data in python.  flask-Marshmallow allows for schema definition, automatic validation, seamless integration with flask, support for multiple data formats including JSON, YAML etc, customizable and integrates with other flask-extensions/libraries(flask-marshmallow documentation. 2022)(9)
+- flask-bcrypt: flask-bcrypt is a flask extension that allows the integration between flask webb apps and bcrypt, which is a popular python library for password hashing/salting. Making passwords more secure and difficult for attackers to crack user passwords. It features flask integration, password hashing and salting, password verification, and high performance(flask-bcrypt documentation. 2022)(10).
+- flask-jwt-extender: flask_jwt_extender is a flask extension that provides integration with PyJWT library, a library that is used for JSON authentication and authorization. Features are the JWT authentication, integration with flask, token creation and verification, customization and token expiration and refresh(flask_jwt_extender documentation. 2022)(11).
+- Insomnia/postman: Insomnia and postman are tools that are used to develop the api, providing a graphical interface for sending http requests and viewing the responses generated. Giving the a developer an easy way to test and debug the API.  
 
 ***
 
@@ -434,6 +457,8 @@ The relations that are implemented are as follows:
 
 ### R10) Describe the way tasks are allocated and tracked in your project
 
+#### [Trello gig_guide_api Kanban board link](https://trello.com/invite/b/lOKHVxJ7/ATTI64452f13177b335a9bf1e6eb7c4c87ec89C06397/gig-guide-api)
+
 For this project I decided to use Trello boards with a kanban style set up of the cards. In each card there is often checklists to check off as I am going through this project, I have set realistic dates to achieve these by that allows for time to make sure everything is running smoothly towards the end of the project.
 
 The initial phase of the setup is done through a few various cards which are, the create virtual environment card, set up postgresql card - setting dates for these as the 2nd of March. My next step is to create the main application file, main.py, creating a config file and connecting that to the main app function. Also have the set up for the .env and .flask-env files. These cards have set dates for the 4th of March to be completed.  
@@ -453,8 +478,42 @@ Routing for venues is the next card to check off that follows the same principal
 Routing for Shows again follows similar CRUD principals allowing a venue or band to create, update, read and delete upcoming shows. It also has features to display shows that are connected to one venue or shows that are connected to one band.  
 The Attending routing is done through users which gives users the ability to add themselves as attending to a show, delete their attendance to a show and update their attendance to a different show. It also allows displaying of users going to a single show and shows that one user is selected to attend. These routes are all intended to be finalized by the 12th of March.  
 Finally the last cards are for the documentation that is intended to finish up by the 17th of March. To have all the coding finished by the 12th is my ideal mission as this allows for testing to ensure everything is being handled appropriately, error handing is completely covered and if any features need editing or adding.  
+
+#### **UPDATES**
+
+Whilst working on this project some of the timelines reflected in the intial planning stages had been changed and is reflected within the Trello board linked to the page. Specifically routing was extended to the 13th of March. Updated details are also within the Trello board, the implementation of a playing table was something that become developed back into application whilst working on the bands and shows routing. Realizing that I needed to show a many to many relationship to help with data normalization. The playing table was modelled in and had a card designed for the routing, which allows for adding and deleting a playing instance. Other additional cards were made towards the end of the project, which are in relation to error handling, implementing dry principals and fixing code to be more readable and follow pep-8 guidelines. These are all reflected in the linked trello board. There are also screenshots below to reflect the development process.  
+
 ***
 
-### Software Development Plan
+### Software Development Plan Images
+
+![development update 1](./docs/trello_screenshots/development-update.png)
+![development update 2](./docs/trello_screenshots/development-update2.png)
+![development update 3](./docs/trello_screenshots/development-update3.png)
+![development update 4](./docs/trello_screenshots/development-update4.png)
+![development update 5](./docs/trello_screenshots/development-update5.png)
+![development update 6](./docs/trello_screenshots/development-update6.png)
+![development update 7](./docs/trello_screenshots/development-update7.png)
+![development update 8](./docs/trello_screenshots/development-update8.png)
+![development update 9](./docs/trello_screenshots/development-update9.png)
+![development update 10](./docs/trello_screenshots/development-update10.png)
+![development update 11](./docs/trello_screenshots/development-update11.png)
+![development update 12](./docs/trello_screenshots/development-update12.png)
+![development update 13](./docs/trello_screenshots/development-update13.png)
+![development update 14](./docs/trello_screenshots/development-update14.png)
 
 ***
+
+### References
+
+- (1): _Panchenko, I. 2021. PostgreSQL benefits and challenges: A snapshot. <https://www.infoworld.com/article/3619531/postgresql-benefits-and-challenges-a-snapshot.html>_
+- (2): _Chiessi, L. 2018. Why Should I use PostgreSQL as Database in my Startup/Company. <https://medium.com/we-build-state-of-the-art-software-creating/why-should-i-use-postgresql-as-database-in-my-startup-company-96de2fd375a9>_
+- (3): _Dhruv, S. 2019. Postgresql Advantages and Disadvantages. <https://www.aalpha.net/blog/pros-and-cons-of-using-postgresql-for-application-development/>_
+- (4): _Pedamkar, P. 2022. What is ORM?. <https://www.educba.com/what-is-orm/>_
+- (5): _Zelinksy, A. 2022. What is Object-Relational Mapping. <https://medium.com/@alexzelinsky124/what-is-object-relational-mapping-orm-4b7d98bbb16f>_
+- (6): _Makai, M. 2022. Object-Relational Mappers. <https://www.fullstackpython.com/object-relational-mappers-orms.html>_
+- (7): _Flask documentation. 2022. <https://flask.palletsprojects.com/en/2.2.x/>_
+- (8): _Flask-sqlalchemy documentation. 2022. <https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/>_
+- (9): _Flask-Marshmallow documentation. 2022. <https://flask-marshmallow.readthedocs.io/en/latest/>_
+- (10): _Flask-bcrypt documentation. 2022. <https://flask-bcrypt.readthedocs.io/en/1.0.1/>_
+- (11): _Flask-JWT-Extender documentation. 2022. <https://flask-jwt-extended.readthedocs.io/en/stable/>_
